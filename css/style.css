@@ -394,9 +394,22 @@ p{ margin:0; }
 .air{ animation:rise 2.8s ease-out infinite; }
 .air--2{ animation-delay:1.4s; }
 
-.zone{ cursor:pointer; }
-.zone .zone__hit{ fill:transparent; }
+/* Графика раздела ничего не ловит — она только показывает. Мышь ловит
+   слой .hits, который лежит поверх всей схемы. */
+.zone{ pointer-events:none; }
 .zone .zone__art{ transition:opacity .2s ease; opacity:.72; }
+
+/* Области нужны только как геометрия — раздел под курсором скрипт находит
+   сам. Мышь они не ловят, иначе браузер снова начнёт путать цель. */
+.hits{ pointer-events:none; }
+.hits .hit{ fill:transparent; }
+.cutaway__figure.is-hot{ cursor:pointer; }
+.hits .hit:focus{ outline:none; }
+.hits .hit:focus-visible{
+  stroke:var(--brass-lt);
+  stroke-width:2;
+  stroke-dasharray:4 3;
+}
 .zone .zone__label{
   font-family:var(--mono);
   font-size:11px;
@@ -408,16 +421,11 @@ p{ margin:0; }
 .zone .zone__sub{ font-size:9px; }
 .cutaway .floors{ font-size:9px; }
 .zone .zone__tick{ stroke:rgba(255,255,255,.2); stroke-width:1; transition:stroke .2s ease; }
-.zone:hover .zone__art,
+/* Подсветку включает скрипт классом is-active: :hover тут не подходит,
+   потому что курсор находится над слоем захвата, а не над графикой. */
 .zone.is-active .zone__art{ opacity:1; }
-.zone:hover .zone__label,
 .zone.is-active .zone__label{ fill:#fff; }
-.zone:hover .zone__tick,
 .zone.is-active .zone__tick{ stroke:var(--brass-lt); }
-.zone.is-active .zone__glow{ opacity:1; }
-.zone .zone__glow{ opacity:0; transition:opacity .2s ease; }
-.zone:focus{ outline:none; }
-.zone:focus-visible .zone__hit{ stroke:var(--brass-lt); stroke-width:2; stroke-dasharray:4 3; }
 
 .cutaway__readout{
   margin-top:.9rem;

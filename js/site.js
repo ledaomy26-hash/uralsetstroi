@@ -151,8 +151,11 @@
     counters.forEach(function (el) { countObserver.observe(el); });
   }
 
-  /* --- Разрез объекта: выбор раздела ------------------------------------- */
+  /* --- Разрез объекта: выбор раздела -------------------------------------
+     Мышь ловит отдельный слой .hits поверх всей графики, а подсвечивается
+     соответствующая группа .zone — они связаны через data-zone. */
   var zones = document.querySelectorAll('.cutaway .zone');
+  var hits = document.querySelectorAll('.cutaway .hit');
   var outCode = document.getElementById('cutCode');
   var outTitle = document.getElementById('cutTitleOut');
   var outText = document.getElementById('cutText');
@@ -165,8 +168,12 @@
       text: outText.textContent
     };
     var pinned = null;
+    var current = null;   // какая зона показана сейчас
+    var leaveTimer = null;
 
     var show = function (zone) {
+      if (current === zone) return;      // тот же раздел — DOM не трогаем
+      current = zone;
       outCode.textContent = zone.dataset.code;
       outTitle.textContent = zone.dataset.title;
       outText.textContent = zone.dataset.text;
@@ -175,6 +182,9 @@
     };
 
     var reset = function () {
+      if (pinned) return;          // закреплённый раздел не гасим
+      if (current === null) return;
+      current = null;
       outCode.textContent = base.code;
       outTitle.textContent = base.title;
       outText.textContent = base.text;
@@ -182,22 +192,65 @@
       if (hint) hint.textContent = 'наведите на раздел';
     };
 
-    zones.forEach(function (zone) {
-      zone.addEventListener('mouseenter', function () { if (!pinned) show(zone); });
-      zone.addEventListener('mouseleave', function () { if (!pinned) reset(); });
-      zone.addEventListener('focus', function () { show(zone); });
+    // ключ раздела → группа с графикой
+    var byKey = {};
+    zones.forEach(function (z) { byKey[z.dataset.zone] = z; });
 
-      var pin = function (e) {
-        e.preventDefault();
-        if (pinned === zone) { pinned = null; reset(); }
-        else { pinned = zone; show(zone); }
-      };
+    var figure = document.querySelector('.cutaway__figure');
 
-      zone.addEventListener('click', pin);
-      zone.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') pin(e);
+    /* Раздел под курсором ищем сами, по координатам. Своё наведение браузера
+       здесь использовать нельзя: внутри SVG с работающими анимациями он
+       периодически отдаёт целью фон вместо области, и подсказка мигает
+       даже на неподвижном курсоре. Геометрию берём у тех же областей. */
+    var zoneAt = function (x, y) {
+      for (var i = 0; i < hits.length; i++) {
+        var r = hits[i].getBoundingClientRect();
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+          return byKey[hits[i].dataset.zone] || null;
+        }
+      }
+      return null;
+    };
+
+    if (figure) {
+      figure.addEventListener('mousemove', function (e) {
+        if (pinned) return;
+        var zone = zoneAt(e.clientX, e.clientY);
+        figure.classList.toggle('is-hot', !!zone);
+        if (zone) {
+          clearTimeout(leaveTimer);
+          show(zone);
+        } else {
+          // между разделами есть промежутки: не гасим сразу, иначе при
+          // движении вдоль трубы подсказка успевает мигнуть
+          clearTimeout(leaveTimer);
+          leaveTimer = setTimeout(reset, 140);
+        }
       });
-    });
+
+      figure.addEventListener('mouseleave', function () {
+        figure.classList.remove('is-hot');
+        clearTimeout(leaveTimer);
+        if (!pinned) reset();
+      });
+
+      figure.addEventListener('click', function (e) {
+        var zone = zoneAt(e.clientX, e.clientY);
+        if (!zone) return;
+        clearTimeout(leaveTimer);
+        if (pinned === zone) {
+          pinned = null;           // второй щелчок — открепить, но оставить показ
+          show(zone);
+        } else {
+          pinned = zone;
+          show(zone);
+        }
+      });
+    }
+
+    /* Клавиатурной навигации по областям нет намеренно: фокус на невидимом
+       прямоугольнике заставлял браузер прокручивать страницу к нему.
+       Те же шесть разделов идут ниже обычными ссылками — там всё доступно. */
   }
 
   /* --- Заявка: собираем текст и отдаём в почту или WhatsApp -------------- */
