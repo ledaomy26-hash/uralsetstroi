@@ -304,26 +304,34 @@ p{ margin:0; }
 .hero__grid{
   position:relative;
   display:grid;
-  /* Схеме отдаём больше места: от её ширины зависит размер подписей
-     на чертеже — при узкой колонке они становились нечитаемыми. */
-  grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
-  gap:clamp(1.6rem,2.4vw,3rem);
-  align-items:center;
-  padding-block:clamp(3rem,2rem + 4vw,5.5rem);
+  /* Колонки поровну: широкая колонка схемы вынуждала заголовок
+     переноситься пять раз и наезжать на рамку чертежа. */
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(1.3rem,2.1vw,2.5rem);
+  /* Отступы держим скромными: первый экран должен влезать в окно целиком,
+     без прокрутки. */
+  padding-block:clamp(1rem,.5rem + 1.5vw,1.85rem);
 }
-.hero__copy{ display:grid; gap:1.5rem; align-content:start; }
-.hero h1{ color:#fff; }
+.hero__copy{ display:grid; gap:clamp(.55rem,1.5vh,1.25rem); align-content:start; }
+.hero h1{
+  color:#fff;
+  /* Кегль свой, меньше общего --step-4: на нём заголовок вылезал из своей
+     колонки на 75px и наезжал на рамку схемы, а экран не влезал в окно. */
+  font-size:clamp(1.8rem,1rem + 2.3vw,2.95rem);
+  line-height:1.04;
+}
 .hero h1 em{
   font-style:normal;
   color:var(--brass-lt);
 }
 .hero__lede{
-  font-size:var(--step-1);
-  line-height:1.55;
+  font-size:var(--step-0);
+  line-height:1.5;
   color:#B9C9DA;
-  max-width:46ch;
+  max-width:54ch;
 }
-.hero__actions{ display:flex; flex-wrap:wrap; gap:.8rem; }
+.hero__actions{ display:flex; flex-wrap:wrap; gap:.7rem; }
+.hero__actions .btn{ padding:.78rem 1.3rem; }
 .hero__meta{
   display:flex;
   flex-wrap:wrap;
@@ -333,9 +341,9 @@ p{ margin:0; }
   letter-spacing:.1em;
   text-transform:uppercase;
   color:#7E97AF;
-  padding-top:.9rem;
+  padding-top:.7rem;
   border-top:1px solid var(--line-dark);
-  margin-top:.4rem;
+  margin-top:.2rem;
 }
 /* Точку клеим к концу предыдущего пункта — иначе при переносе строки
    она уезжает вперёд и начинает строку. */
@@ -350,11 +358,20 @@ p{ margin:0; }
   background:rgba(255,255,255,.035);
   border:1px solid var(--line-dark);
   border-radius:var(--radius);
-  padding:clamp(.8rem,1.5vw,1.4rem);
+  padding:clamp(.7rem,1.1vw,1.05rem);
 }
 /* overflow скрываем: при visible подложка грунта и подписи выходили
    за рамку схемы, и страницу тянуло вправо. */
-.cutaway svg{ width:100%; height:auto; overflow:hidden; }
+/* Чертёж не выше того, что оставляет окно: иначе первый экран не влезает
+   и его приходится прокручивать, чтобы увидеть целиком. Если места мало,
+   svg сам вписывает рисунок по высоте и центрует его. */
+.cutaway svg{
+  width:100%;
+  height:auto;
+  overflow:hidden;
+  max-height:calc(100vh - 406px);
+  max-height:calc(100svh - 406px);
+}
 .cutaway__cap{
   display:flex;
   justify-content:space-between;
@@ -364,7 +381,7 @@ p{ margin:0; }
   letter-spacing:.13em;
   text-transform:uppercase;
   color:#7E97AF;
-  margin-bottom:.7rem;
+  margin-bottom:.55rem;
 }
 
 /* Чертёж прорисовывается при загрузке: длину контура считает site.js */
@@ -418,7 +435,7 @@ p{ margin:0; }
    Пояснение под ним — мельче и нейтральным серым. */
 .zone .zone__label{
   font-family:var(--mono);
-  font-size:18px;
+  font-size:24px;
   font-weight:500;
   letter-spacing:.04em;
   fill:var(--tone,#A8BED2);
@@ -431,13 +448,13 @@ p{ margin:0; }
 }
 .zone .zone__sub,
 .zone .zone__pipe{
-  font-size:12.5px;
+  font-size:16px;
   font-weight:400;
-  letter-spacing:.06em;
+  letter-spacing:.04em;
   fill:#9DB2C6;
   stroke-width:3px;
 }
-.cutaway .floors{ font-size:11px; }
+.cutaway .floors{ font-size:13.5px; }
 
 /* цвета те же, что у карточек разделов */
 .zone[data-zone="vk"]   { --tone:#7FCBF5; }
@@ -456,15 +473,15 @@ p{ margin:0; }
 .zone.is-active .zone__tick{ stroke:var(--brass-lt); }
 
 .cutaway__readout{
-  margin-top:.9rem;
-  min-height:6.2rem;
+  margin-top:.7rem;
+  min-height:4.8rem;
   border:1px solid var(--line-dark);
   border-left:3px solid var(--brass);
   border-radius:var(--radius);
   background:rgba(255,255,255,.045);
-  padding:1rem 1.2rem;
+  padding:.75rem 1rem;
   display:grid;
-  gap:.35rem;
+  gap:.22rem;
   align-content:start;
 }
 .cutaway__code{
@@ -477,11 +494,11 @@ p{ margin:0; }
 .cutaway__title{
   font-family:var(--display);
   font-weight:700;
-  font-size:1.06rem;
+  font-size:1rem;
   color:#fff;
   letter-spacing:-.01em;
 }
-.cutaway__text{ font-size:.92rem; line-height:1.55; color:#B9C9DA; }
+.cutaway__text{ font-size:.82rem; line-height:1.45; color:#B9C9DA; }
 
 /* --- Разделы работ ------------------------------------------------------ */
 /* Шесть разделов делим на два ряда по три — четвёртая колонка оставляла
