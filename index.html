@@ -84,7 +84,7 @@
           <span id="cutHint">наведите на раздел</span>
         </p>
 
-        <svg viewBox="26 40 648 496" role="img" aria-labelledby="cutTitle cutDesc">
+        <svg viewBox="8 40 666 496" role="img" aria-labelledby="cutTitle cutDesc">
           <title id="cutTitle">Разрез здания с инженерными разделами</title>
           <desc id="cutDesc">Схема показывает, где на объекте расположены вентиляция, стояки водоснабжения и отопления, электрощитовая, тепловой пункт, гидроизоляция и наружные сети. Все шесть разделов перечислены ниже на странице.</desc>
 
@@ -97,9 +97,9 @@
             </pattern>
           </defs>
 
-          <!-- грунт -->
-          <rect x="0" y="468" width="700" height="92" fill="url(#soil)"/>
-          <line x1="0" y1="468" x2="700" y2="468" stroke="rgba(255,255,255,.28)" stroke-width="1.5"/>
+          <!-- грунт: ровно по рамке схемы, иначе вылезает за её край -->
+          <rect x="8" y="468" width="666" height="68" fill="url(#soil)"/>
+          <line x1="8" y1="468" x2="674" y2="468" stroke="rgba(255,255,255,.28)" stroke-width="1.5"/>
 
           <!-- коробка здания -->
           <g stroke="rgba(255,255,255,.42)" stroke-width="1.5" fill="none">
@@ -185,16 +185,15 @@
                 <path d="M274 170 h44 M274 224 h44 M274 278 h44 M274 332 h44"/>
               </g>
               <!-- наружная сеть под землёй -->
-              <path d="M258 455 V500 H40" stroke="#3E9BD8" stroke-width="2.5" fill="none" opacity=".9"/>
-              <path class="flow flow--down flow--slow" d="M258 455 V500 H40" stroke="#8FD3FF"/>
-              <circle cx="40" cy="500" r="9" fill="none" stroke="#3E9BD8" stroke-width="2" opacity=".9"/>
-              <path d="M40 491 v-9" stroke="#3E9BD8" stroke-width="2" opacity=".9"/>
+              <path d="M258 455 V500 H52" stroke="#3E9BD8" stroke-width="2.5" fill="none" opacity=".9"/>
+              <path class="flow flow--down flow--slow" d="M258 455 V500 H52" stroke="#8FD3FF"/>
+              <circle cx="52" cy="500" r="9" fill="none" stroke="#3E9BD8" stroke-width="2" opacity=".9"/>
+              <path d="M52 491 v-9" stroke="#3E9BD8" stroke-width="2" opacity=".9"/>
             </g>
             <line class="zone__tick" x1="258" y1="238" x2="180" y2="238"/>
             <text class="zone__label" x="172" y="235" text-anchor="end">ВК</text>
             <text class="zone__label zone__sub" x="172" y="249" text-anchor="end">вода и канализация</text>
-            <line class="zone__tick" x1="150" y1="500" x2="120" y2="500"/>
-            <text class="zone__label zone__sub" x="112" y="497" text-anchor="end">наружные сети</text>
+            <text class="zone__label zone__pipe" x="148" y="520" text-anchor="middle">наружные сети</text>
           </g>
 
           <!-- ══ ЭМ: щитовая и кабельные линии ══ -->
@@ -256,7 +255,7 @@
             <rect class="hit" data-zone="ovik" x="240" y="44" width="290" height="76"/>
             <rect class="hit" data-zone="ov" x="344" y="130" width="100" height="272"/>
             <rect class="hit" data-zone="vk" x="248" y="130" width="44" height="272"/>
-            <rect class="hit" data-zone="vk" x="30" y="480" width="240" height="40"/>
+            <rect class="hit" data-zone="vk" x="30" y="482" width="240" height="46"/>
             <rect class="hit" data-zone="em" x="298" y="344" width="42" height="58"/>
             <rect class="hit" data-zone="itp" x="360" y="404" width="130" height="50"/>
             <rect class="hit" data-zone="itp" x="344" y="486" width="330" height="28"/>

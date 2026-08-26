@@ -304,8 +304,10 @@ p{ margin:0; }
 .hero__grid{
   position:relative;
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);
-  gap:clamp(2rem,4vw,4.5rem);
+  /* Схеме отдаём больше места: от её ширины зависит размер подписей
+     на чертеже — при узкой колонке они становились нечитаемыми. */
+  grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+  gap:clamp(1.6rem,2.4vw,3rem);
   align-items:center;
   padding-block:clamp(3rem,2rem + 4vw,5.5rem);
 }
@@ -350,7 +352,9 @@ p{ margin:0; }
   border-radius:var(--radius);
   padding:clamp(.8rem,1.5vw,1.4rem);
 }
-.cutaway svg{ width:100%; height:auto; overflow:visible; }
+/* overflow скрываем: при visible подложка грунта и подписи выходили
+   за рамку схемы, и страницу тянуло вправо. */
+.cutaway svg{ width:100%; height:auto; overflow:hidden; }
 .cutaway__cap{
   display:flex;
   justify-content:space-between;
@@ -410,21 +414,45 @@ p{ margin:0; }
   stroke-width:2;
   stroke-dasharray:4 3;
 }
+/* Шифр раздела — крупно и в цвете своего раздела, как на карточках ниже.
+   Пояснение под ним — мельче и нейтральным серым. */
 .zone .zone__label{
   font-family:var(--mono);
-  font-size:11px;
-  letter-spacing:.09em;
-  fill:#8FA8BF;
-  transition:fill .2s ease;
+  font-size:18px;
+  font-weight:500;
+  letter-spacing:.04em;
+  fill:var(--tone,#A8BED2);
+  transition:fill .2s ease, opacity .2s ease;
   pointer-events:none;
+  paint-order:stroke;
+  stroke:rgba(13,39,64,.75);
+  stroke-width:3px;
+  stroke-linejoin:round;
 }
-.zone .zone__sub{ font-size:9px; }
-.cutaway .floors{ font-size:9px; }
+.zone .zone__sub,
+.zone .zone__pipe{
+  font-size:12.5px;
+  font-weight:400;
+  letter-spacing:.06em;
+  fill:#9DB2C6;
+  stroke-width:3px;
+}
+.cutaway .floors{ font-size:11px; }
+
+/* цвета те же, что у карточек разделов */
+.zone[data-zone="vk"]   { --tone:#7FCBF5; }
+.zone[data-zone="ov"]   { --tone:#FF9E72; }
+.zone[data-zone="itp"]  { --tone:#EFB877; }
+.zone[data-zone="ovik"] { --tone:#5FD3BE; }
+.zone[data-zone="em"]   { --tone:#F2D06B; }
+.zone[data-zone="gi"]   { --tone:#B6C6D6; }
 .zone .zone__tick{ stroke:rgba(255,255,255,.2); stroke-width:1; transition:stroke .2s ease; }
 /* Подсветку включает скрипт классом is-active: :hover тут не подходит,
    потому что курсор находится над слоем захвата, а не над графикой. */
 .zone.is-active .zone__art{ opacity:1; }
 .zone.is-active .zone__label{ fill:#fff; }
+.zone.is-active .zone__sub,
+.zone.is-active .zone__pipe{ fill:#DCE7F1; }
 .zone.is-active .zone__tick{ stroke:var(--brass-lt); }
 
 .cutaway__readout{
@@ -1088,10 +1116,11 @@ table.spec tfoot td.num{ font-size:1rem; color:var(--blueprint); }
   .masthead .phone{ display:none; }
 }
 
-/* Схема сжимается вместе с экраном, и подписи в 9–11px становятся
-   нечитаемыми. На узком оставляем только шифры разделов, крупно. */
+/* Схема сжимается вместе с экраном, и мелкие подписи становятся
+   нечитаемыми. На узком оставляем шифры и подпись у трубы, крупнее. */
 @media (max-width:820px){
-  .zone .zone__label{ font-size:19px; letter-spacing:.04em; }
+  .zone .zone__label{ font-size:27px; letter-spacing:0; }
+  .zone .zone__pipe{ font-size:21px; }
   .zone .zone__sub,
   .cutaway .floors{ display:none; }
 }
