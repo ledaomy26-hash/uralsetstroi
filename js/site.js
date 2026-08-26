@@ -197,6 +197,57 @@
     zones.forEach(function (z) { byKey[z.dataset.zone] = z; });
 
     var figure = document.querySelector('.cutaway__figure');
+    var readout = document.getElementById('cutRead');
+    var cap = document.querySelector('.cutaway__cap');
+
+    /* Тексты разделов разной длины, и блок подсказки от них менял высоту.
+       Колонка выравнивается по центру, поэтому схема ездила вверх-вниз.
+       Считаем самый высокий вариант и закрепляем высоту — рисунок стоит
+       на месте, а подсказка меняется внутри готового места. */
+    var lockHeights = function () {
+      var keep = {
+        code: outCode.textContent,
+        title: outTitle.textContent,
+        text: outText.textContent,
+        hint: hint ? hint.textContent : null
+      };
+
+      if (readout) {
+        readout.style.minHeight = '';
+        var maxRead = readout.offsetHeight;
+        zones.forEach(function (z) {
+          outCode.textContent = z.dataset.code;
+          outTitle.textContent = z.dataset.title;
+          outText.textContent = z.dataset.text;
+          if (readout.offsetHeight > maxRead) maxRead = readout.offsetHeight;
+        });
+        outCode.textContent = keep.code;
+        outTitle.textContent = keep.title;
+        outText.textContent = keep.text;
+        readout.style.minHeight = maxRead + 'px';
+      }
+
+      // подпись над схемой тоже меняется — «наведите на раздел» / «раздел выбран»
+      if (cap && hint) {
+        cap.style.minHeight = '';
+        var maxCap = cap.offsetHeight;
+        ['наведите на раздел', 'раздел выбран'].forEach(function (t) {
+          hint.textContent = t;
+          if (cap.offsetHeight > maxCap) maxCap = cap.offsetHeight;
+        });
+        hint.textContent = keep.hint;
+        cap.style.minHeight = maxCap + 'px';
+      }
+    };
+
+    lockHeights();
+    // после подгрузки шрифтов размеры меняются — пересчитываем
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockHeights);
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(lockHeights, 200);
+    });
 
     /* Раздел под курсором ищем сами, по координатам. Своё наведение браузера
        здесь использовать нельзя: внутри SVG с работающими анимациями он
