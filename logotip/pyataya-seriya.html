@@ -485,6 +485,34 @@ p{margin:0}
 .гамма__пара i{width:17px; height:30px; display:block}
 .гамма__имя{font-size:.82rem; line-height:1.3; color:var(--тушь-2)}
 .гамма__имя b{display:block; color:var(--тушь); font-size:.84rem}
+/* лента переключателя липкая, поэтому при переходе к карточке
+   заголовок уезжает под неё: отступ прокрутки это снимает */
+.вариант{scroll-margin-top:168px}
+.обзор{scroll-margin-top:24px}
+@media (max-width:820px){ .вариант{scroll-margin-top:132px} }
+
+/* листание: подбирать двадцать вариантов лентой наверху неудобно */
+.листание{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px;
+}
+.листание__кн{
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+  font-family:"Oswald",sans-serif; font-size:.82rem; font-weight:500;
+  text-transform:uppercase; letter-spacing:.04em;
+  color:var(--тушь); background:var(--карта);
+  border:1px solid var(--линия-2); border-radius:3px; padding:7px 12px;
+  transition:border-color .15s, color .15s;
+}
+.листание__кн:hover{border-color:var(--акцент); color:var(--акцент)}
+.листание__кн:focus-visible{outline:2px solid var(--акцент); outline-offset:2px}
+.листание__кн--сетка{background:transparent}
+.листание__счёт{
+  font-family:"JetBrains Mono",monospace; font-size:.76rem;
+  color:var(--тушь-3); margin-left:4px;
+}
+@media (max-width:520px){
+  .листание__счёт{width:100%; margin-left:0}
+}
 /* клик по знаку в сетке открывает разбор — так подбирать быстрее,
    чем искать вариант в ленте переключателя */
 .обзор__рамка{
@@ -574,6 +602,10 @@ p{margin:0}
 
   <section class="глава">
     <h2>Те же двадцать, разложенные по приёму</h2>
+    <p class="глава__лид">Подсказка: щёлкните по любому знаку в сетке —
+      откроется его разбор со всеми носителями. Листать варианты можно
+      кнопками в карточке или стрелками ← → на клавиатуре: видно,
+      как меняются визитка, бланк и шапка сайта.</p>
     <p class="глава__лид">Двадцать знаков подряд сравнивать тяжело.
       Здесь они собраны в пять групп: внутри группы композиция одна
       и та же, отличаются обрамление, приём и гамма — так проще
@@ -589,6 +621,12 @@ p{margin:0}
     <span class="шифр">вариант 31 · пятая серия</span>
     <h3>Корона</h3>
     <p class="суть">Середина выше: У крупная, две С по бокам</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">31 из 50 · 1 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -692,6 +730,12 @@ p{margin:0}
     <span class="шифр">вариант 32 · пятая серия</span>
     <h3>Чаша</h3>
     <p class="суть">Середина ниже: крайние буквы выше средней</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">32 из 50 · 2 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -795,6 +839,12 @@ p{margin:0}
     <span class="шифр">вариант 33 · пятая серия</span>
     <h3>Восход</h3>
     <p class="суть">Лестница вверх: каждая буква крупнее предыдущей</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">33 из 50 · 3 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -898,6 +948,12 @@ p{margin:0}
     <span class="шифр">вариант 34 · пятая серия</span>
     <h3>Закат</h3>
     <p class="суть">Лестница вниз, буквы равняются по верхней линии</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">34 из 50 · 4 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1001,6 +1057,12 @@ p{margin:0}
     <span class="шифр">вариант 35 · пятая серия</span>
     <h3>Трон</h3>
     <p class="суть">У крупная, две С сцеплены у её плеча</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">35 из 50 · 5 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1104,6 +1166,12 @@ p{margin:0}
     <span class="шифр">вариант 36 · пятая серия</span>
     <h3>Диагональ</h3>
     <p class="суть">Буквы одного размера, каждая выше предыдущей</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">36 из 50 · 6 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1207,6 +1275,12 @@ p{margin:0}
     <span class="шифр">вариант 37 · пятая серия</span>
     <h3>Спуск</h3>
     <p class="суть">Та же диагональ вниз, холодный металл</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">37 из 50 · 7 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1310,6 +1384,12 @@ p{margin:0}
     <span class="шифр">вариант 38 · пятая серия</span>
     <h3>Гнездо</h3>
     <p class="суть">Две С сложены столбиком в плече крупной У</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">38 из 50 · 8 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1413,6 +1493,12 @@ p{margin:0}
     <span class="шифр">вариант 39 · пятая серия</span>
     <h3>Пик</h3>
     <p class="суть">Корона контуром, У вытянута сильнее всех</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">39 из 50 · 9 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1516,6 +1602,12 @@ p{margin:0}
     <span class="шифр">вариант 40 · пятая серия</span>
     <h3>Ладья</h3>
     <p class="суть">Середина опущена ниже общей линии</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">40 из 50 · 10 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1619,6 +1711,12 @@ p{margin:0}
     <span class="шифр">вариант 41 · пятая серия</span>
     <h3>Клеймо</h3>
     <p class="суть">Корона в двойном кольце</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">41 из 50 · 11 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1722,6 +1820,12 @@ p{margin:0}
     <span class="шифр">вариант 42 · пятая серия</span>
     <h3>Щит</h3>
     <p class="суть">Лестница в геральдическом щите</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">42 из 50 · 12 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1825,6 +1929,12 @@ p{margin:0}
     <span class="шифр">вариант 43 · пятая серия</span>
     <h3>Табличка</h3>
     <p class="суть">Корона на скруглённой плашке</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">43 из 50 · 13 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -1928,6 +2038,12 @@ p{margin:0}
     <span class="шифр">вариант 44 · пятая серия</span>
     <h3>Свет</h3>
     <p class="суть">Корона наоборот: латунь по кремовой бумаге</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">44 из 50 · 14 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2031,6 +2147,12 @@ p{margin:0}
     <span class="шифр">вариант 45 · пятая серия</span>
     <h3>Пергамент</h3>
     <p class="суть">Чаша в двойной рамке на слоновой кости</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">45 из 50 · 15 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2134,6 +2256,12 @@ p{margin:0}
     <span class="шифр">вариант 46 · пятая серия</span>
     <h3>Оникс</h3>
     <p class="суть">Чаша контуром, средняя С приподнята внутрь</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">46 из 50 · 16 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2237,6 +2365,12 @@ p{margin:0}
     <span class="шифр">вариант 47 · пятая серия</span>
     <h3>Патина</h3>
     <p class="суть">Буквы просвечивают, нахлёсты плотнее</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">47 из 50 · 17 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2340,6 +2474,12 @@ p{margin:0}
     <span class="шифр">вариант 48 · пятая серия</span>
     <h3>Стела</h3>
     <p class="суть">Два яруса: У сверху, две С под ней</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">48 из 50 · 18 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2443,6 +2583,12 @@ p{margin:0}
     <span class="шифр">вариант 49 · пятая серия</span>
     <h3>Вершина</h3>
     <p class="суть">Самый резкий перепад: У почти вдвое выше С</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">49 из 50 · 19 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2546,6 +2692,12 @@ p{margin:0}
     <span class="шифр">вариант 50 · пятая серия</span>
     <h3>Печатка</h3>
     <p class="суть">Корона в двойном овале</p>
+    <div class="листание">
+      <button class="листание__кн" data-шаг="-1">← предыдущий</button>
+      <button class="листание__кн листание__кн--сетка" data-к-сетке="1">все двадцать</button>
+      <button class="листание__кн" data-шаг="1">следующий →</button>
+      <span class="листание__счёт">50 из 50 · 20 из 20 в серии</span>
+    </div>
   </header>
 
   <div class="вариант__тело">
@@ -2747,16 +2899,52 @@ p{margin:0}
 })();
 
 (function(){
-  // сетка обзора: клик по знаку открывает его разбор и подводит к нему
-  var кнопки = document.querySelectorAll('.обзор__рамка[data-target]');
-  кнопки.forEach(function(к){
-    к.addEventListener('click', function(){
-      var цель = к.getAttribute('data-target');
-      var таб = document.querySelector('.таб[data-target="' + цель + '"]');
-      if (таб) { таб.click(); }
+  var табы = [].slice.call(document.querySelectorAll('.таб'));
+  function открыть(цель, вести){
+    var таб = document.querySelector('.таб[data-target="' + цель + '"]');
+    if (таб) { таб.click(); }
+    if (вести) {
       var карта = document.getElementById(цель);
       if (карта) { карта.scrollIntoView({block:'start', behavior:'smooth'}); }
+    }
+  }
+  // сетка обзора: клик по знаку открывает его разбор и подводит к нему
+  document.querySelectorAll('.обзор__рамка[data-target]').forEach(function(к){
+    к.addEventListener('click', function(){
+      открыть(к.getAttribute('data-target'), true);
     });
+  });
+  function сейчас(){
+    var к = document.querySelector('.вариант.виден');
+    return к ? к.id : null;
+  }
+  function сдвинуть(шаг){
+    var цель = сейчас();
+    var i = табы.findIndex(function(т){
+      return т.getAttribute('data-target') === цель;
+    });
+    if (i < 0) { i = 0; }
+    var j = (i + шаг + табы.length) % табы.length;   // по кругу
+    открыть(табы[j].getAttribute('data-target'), true);
+  }
+  document.querySelectorAll('.листание__кн[data-шаг]').forEach(function(к){
+    к.addEventListener('click', function(){
+      сдвинуть(parseInt(к.getAttribute('data-шаг'), 10));
+    });
+  });
+  document.querySelectorAll('.листание__кн[data-к-сетке]').forEach(function(к){
+    к.addEventListener('click', function(){
+      var о = document.querySelector('.обзор');
+      if (о) { о.scrollIntoView({block:'start', behavior:'smooth'}); }
+    });
+  });
+  // стрелки на клавиатуре — но не когда человек печатает в поле
+  document.addEventListener('keydown', function(e){
+    var т = e.target && e.target.tagName;
+    if (т === 'INPUT' || т === 'TEXTAREA' || e.metaKey || e.ctrlKey ||
+        e.altKey) { return; }
+    if (e.key === 'ArrowLeft')  { сдвинуть(-1); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { сдвинуть(1);  e.preventDefault(); }
   });
 })();
 </script>
