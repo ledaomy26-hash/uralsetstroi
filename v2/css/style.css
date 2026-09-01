@@ -287,7 +287,9 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   content:""; position:absolute; inset:0;
   background:linear-gradient(180deg, rgba(11,13,16,.72) 0%, rgba(11,13,16,.35) 38%, rgba(11,13,16,.88) 100%);
 }
-.hero__inner{ position:relative; z-index:2; width:100%; padding-block:clamp(2.5rem,2rem + 4vw,5.5rem); }
+/* Отступы героя ужаты: при окне 900 px содержимое вылезало за нижний край
+   на 11 px, и первый экран переставал помещаться целиком — замерено. */
+.hero__inner{ position:relative; z-index:2; width:100%; padding-block:clamp(1.8rem,1.4rem + 2.6vw,4rem); }
 .hero h1{ max-width:16ch; }
 .hero h1 em{ font-style:normal; color:var(--latun-sv); display:block; }
 .hero__lede{
@@ -297,8 +299,8 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero__actions{ display:flex; flex-wrap:wrap; gap:.8rem; margin-top:2.2rem; }
 .hero__facts{
   display:flex; flex-wrap:wrap; gap:1.6rem 2.6rem;
-  margin-top:clamp(2.4rem,2rem + 3vw,4.5rem);
-  padding-top:1.4rem; border-top:1px solid rgba(255,255,255,.2);
+  margin-top:clamp(1.6rem,1.2rem + 2.2vw,3.2rem);
+  padding-top:1.2rem; border-top:1px solid rgba(255,255,255,.2);
 }
 .hero__fact{ display:grid; gap:.15rem; }
 .hero__fact b{
@@ -730,3 +732,78 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   body{ background:#fff; color:#000; }
   .section--dark, .foot{ background:#fff; color:#000; }
 }
+
+/* --- Листание по экранам -------------------------------------------------
+   Владелец 01.09.2026: «Первая страница умещается сразу, не надо
+   прокручивать. Крутнул колёсиком — спустился на вторую, и видно, как
+   красиво выставляются цифры. Ещё раз крутнул — третья».
+
+   Сделано прилипанием к началу секции (scroll-snap), а не перехватом
+   колеса: перехват ломает клавиатуру, тачпад и телефон, а снап —
+   штатное поведение браузера. Прилипают только первые ДВА экрана:
+   ниже идут длинные разделы, и там принудительное листание мешало бы
+   читать. Сам режим включает и выключает скрипт по положению страницы.
+
+   На телефоне снап выключен: там адресная строка меняет высоту окна,
+   и экран, посчитанный при загрузке, перестаёт совпадать с видимым. */
+.ekran{ min-height:100svh; }
+
+/* Штатный scroll-snap пробовали первым — он не даёт того, что просили.
+   При mandatory один щелчок колеса (120 px) не перекрывает экран, и браузер
+   возвращает страницу к той же точке: измерено, scrollY после щелчка
+   оставался 33 при цифрах на 911. Поэтому переход делает скрипт: ловит
+   колесо в зоне первых экранов и плавно уводит к следующему.
+   Ниже этой зоны колесо не трогаем — там обычная прокрутка. */
+
+/* Первый экран считается вместе с верхней строкой реквизитов: без этого
+   страница оказывалась на 34 px выше окна и «умещается сразу» не работало.
+   Высоту строки скрипт кладёт в --topbar-h. */
+.hero.ekran{ min-height:calc(100svh - var(--topbar-h, 0px)); }
+
+/* Экран с цифрами: содержимое стоит по центру окна, а не прижато кверху */
+.ekran--cifry{ display:flex; align-items:center; }
+.ekran--cifry > .shell{ width:100%; }
+
+/* Подсказка, что страница листается по экранам. Гаснет, как только
+   человек тронул колесо: дальше она только мешает. */
+/* Стоит справа, а не по центру: по центру подсказка ложилась прямо
+   на строку с цифрами — видно на контрольном снимке. */
+.listaite{
+  position:absolute; right:var(--gutter); bottom:1.4rem;
+  z-index:3; display:flex; flex-direction:column; align-items:center; gap:.5rem;
+  font-family:var(--mono); font-size:.66rem; letter-spacing:.18em;
+  text-transform:uppercase; color:rgba(255,255,255,.6);
+  transition:opacity .4s var(--plavno);
+}
+.listaite i{
+  width:1px; height:34px; background:linear-gradient(180deg,rgba(255,255,255,.05),var(--latun-sv));
+  animation:vniz 2.4s var(--plavno) infinite;
+}
+@keyframes vniz{ 0%{ transform:scaleY(.2); transform-origin:top } 45%{ transform:scaleY(1); transform-origin:top } 55%{ transform:scaleY(1); transform-origin:bottom } 100%{ transform:scaleY(.2); transform-origin:bottom } }
+.is-scrolled .listaite{ opacity:0; pointer-events:none; }
+@media (prefers-reduced-motion: reduce){ .listaite i{ animation:none } }
+@media (max-width:900px){ .listaite{ display:none } }
+
+/* --- Согласие на обработку данных ---------------------------------------
+   По 152-ФЗ согласие должно быть отдельным действием человека, а не
+   строкой рядом с кнопкой: галочку ставит он сам, без неё заявка
+   не собирается (проверка в site.js). */
+.soglasie{
+  display:flex; gap:.8rem; align-items:flex-start;
+  margin-top:1.4rem; cursor:pointer;
+  font-size:.9rem; line-height:1.55; color:#AEB6BF;
+}
+.soglasie input{
+  appearance:none; -webkit-appearance:none;
+  flex:none; width:20px; height:20px; margin-top:.15rem;
+  border:1px solid rgba(255,255,255,.34); border-radius:4px;
+  background:transparent; cursor:pointer;
+  transition:background .18s var(--plavno), border-color .18s var(--plavno);
+}
+.soglasie input:checked{ background:var(--latun-2); border-color:var(--latun-2); }
+.soglasie input:checked::after{
+  content:""; display:block; width:6px; height:11px; margin:2px auto 0;
+  border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg);
+}
+.soglasie a{ color:var(--latun-sv); }
+.form__legal{ margin-top:1rem; }

@@ -34,6 +34,8 @@
 <header class="masthead" id="masthead">
   <div class="shell masthead__row">
     <a class="brand" href="index.html">
+      <img class="brand__mark brand__mark--svet" src="img/znak-latun-svet.svg" alt="" width="160" height="44">
+      <img class="brand__mark brand__mark--tem" src="img/znak-latun-tem.svg" alt="" width="160" height="44">
       <span class="brand__text">
         <span class="brand__name">УРАЛСЕТЬСТРОЙ</span>
         <span class="brand__note">Инженерные системы зданий</span>
@@ -59,7 +61,7 @@
 <main id="main">
 
 <!-- ── Герой: фотография во весь экран ────────────────────────────────── -->
-<section class="hero">
+<section class="hero ekran">
   <div class="hero__foto" style="background-image:url('img/geroy.jpg')" role="img" aria-label="Строящийся жилой дом"></div>
   <div class="shell hero__inner">
     <h1>Инженерные системы дома <em>под один договор</em></h1>
@@ -78,6 +80,48 @@
       <span class="hero__fact"><b>340</b><span>квартир на одном доме</span></span>
       <span class="hero__fact"><b>15<i>дней</i></b><span>досрочно к графику</span></span>
     </div>
+  </div>
+  <span class="listaite" aria-hidden="true"><i></i>листайте</span>
+</section>
+
+<!-- ── Опыт в цифрах ──────────────────────────────────────────────────── -->
+<section class="section section--dark ekran ekran--cifry" id="cifry">
+  <div class="shell">
+    <div class="head reveal">
+      <p class="eyebrow">Опыт в цифрах</p>
+      <h2>Не «большой опыт», а договоры и метры</h2>
+      <p class="lede">Всё, что ниже, подтверждается референс-листом с датами договоров, заказчиками и суммами.</p>
+    </div>
+
+    <div class="ledger reveal">
+      <div class="ledger__row">
+        <p class="ledger__key">Объём 2026</p>
+        <p class="ledger__val">314,3<span>млн ₽</span></p>
+        <p class="ledger__note">Совокупная сумма семи договоров текущего года.</p>
+      </div>
+      <div class="ledger__row">
+        <p class="ledger__key">Договоры</p>
+        <p class="ledger__val">7</p>
+        <p class="ledger__note">Пять подтверждённых и два в исполнении.</p>
+      </div>
+      <div class="ledger__row">
+        <p class="ledger__key">Квартиры</p>
+        <p class="ledger__val">340</p>
+        <p class="ledger__note">Вертикальная разводка ОВ и ВК на одном доме.</p>
+      </div>
+      <div class="ledger__row">
+        <p class="ledger__key">Трубопровод</p>
+        <p class="ledger__val">3 500<span>м</span></p>
+        <p class="ledger__note">На жилом блоке 6.2 в районе «Солнечный».</p>
+      </div>
+      <div class="ledger__row">
+        <p class="ledger__key">Досрочно</p>
+        <p class="ledger__val">15<span>дней</span></p>
+        <p class="ledger__note">Досрочная сдача отдельных работ к графику.</p>
+      </div>
+    </div>
+
+    <p class="ledger__foot">Данные референс-листа, актуального на 20.08.2026.</p>
   </div>
 </section>
 
@@ -443,47 +487,6 @@
   </div>
 </section>
 
-<!-- ── Опыт в цифрах ──────────────────────────────────────────────────── -->
-<section class="section section--dark" id="cifry">
-  <div class="shell">
-    <div class="head reveal">
-      <p class="eyebrow">Опыт в цифрах</p>
-      <h2>Не «большой опыт», а договоры и метры</h2>
-      <p class="lede">Всё, что ниже, подтверждается референс-листом с датами договоров, заказчиками и суммами.</p>
-    </div>
-
-    <div class="ledger reveal">
-      <div class="ledger__row">
-        <p class="ledger__key">Объём 2026</p>
-        <p class="ledger__val">314,3<span>млн ₽</span></p>
-        <p class="ledger__note">Совокупная сумма семи договоров текущего года.</p>
-      </div>
-      <div class="ledger__row">
-        <p class="ledger__key">Договоры</p>
-        <p class="ledger__val">7</p>
-        <p class="ledger__note">Пять подтверждённых и два в исполнении.</p>
-      </div>
-      <div class="ledger__row">
-        <p class="ledger__key">Квартиры</p>
-        <p class="ledger__val">340</p>
-        <p class="ledger__note">Вертикальная разводка ОВ и ВК на одном доме.</p>
-      </div>
-      <div class="ledger__row">
-        <p class="ledger__key">Трубопровод</p>
-        <p class="ledger__val">3 500<span>м</span></p>
-        <p class="ledger__note">На жилом блоке 6.2 в районе «Солнечный».</p>
-      </div>
-      <div class="ledger__row">
-        <p class="ledger__key">Досрочно</p>
-        <p class="ledger__val">15<span>дней</span></p>
-        <p class="ledger__note">Досрочная сдача отдельных работ к графику.</p>
-      </div>
-    </div>
-
-    <p class="ledger__foot">Данные референс-листа, актуального на 20.08.2026.</p>
-  </div>
-</section>
-
 <!-- ── Договоры 2026 ──────────────────────────────────────────────────── -->
 <section class="section" id="dogovory">
   <div class="shell">
@@ -751,9 +754,16 @@
         <p class="form__status" id="formStatus" role="status"></p>
       </div>
 
+      <label class="soglasie">
+        <input type="checkbox" id="fAgree" name="agree" required>
+        <span>Я даю согласие на обработку персональных данных, указанных в этой форме,
+          для ответа на обращение — в порядке <a href="politika.html">политики обработки
+          персональных данных</a> и Федерального закона от 27.07.2006 № 152-ФЗ.</span>
+      </label>
       <p class="form__legal">
         Проект или ведомость объёмов приложите к письму — так расчёт будет точнее.
-        Нажимая кнопку, вы соглашаетесь на <a href="politika.html">обработку указанных данных</a> для ответа на обращение.
+        Данные никуда не отправляются с сайта: форма собирает текст письма,
+        отправляете его вы сами из своей почты или мессенджера.
       </p>
     </form>
 
@@ -816,7 +826,7 @@
     </div>
 
     <p class="foto-note">
-      Фотографии на сайте — иллюстративные, со свободной лицензией (Pexels).
+      Фотографии на сайте — иллюстративные, со свободной лицензией (Pixabay): показано типовое современное оборудование, а не объекты компании.
       Снимки объектов компании поставим на их место, как только они появятся:
       свои фотографии всегда работают лучше стоковых.
     </p>

@@ -39,9 +39,77 @@
   if (masthead) {
     var onScroll = function () {
       masthead.classList.toggle('is-stuck', window.scrollY > 8);
+      document.body.classList.toggle('is-scrolled', window.scrollY > 40);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  /* --- Листание по экранам -----------------------------------------------
+     Владелец: «первая страница умещается сразу; крутнул колёсиком —
+     спустился на вторую, и видно, как выставляются цифры; ещё раз —
+     на третью».
+
+     Штатный scroll-snap это не даёт: при mandatory щелчок колеса в 120 px
+     не перекрывает высоту экрана, и браузер возвращает страницу на место
+     (измерено: scrollY 33 при следующем экране на 911). Поэтому переход
+     делает скрипт.
+
+     Границы, за которые он не выходит:
+       · только мышь на широком экране — на телефоне и тачпаде с инерцией
+         перехват мешает, там прокрутка остаётся обычной;
+       · только в зоне первых экранов, ниже — руки прочь;
+       · при системном «уменьшить движение» не работает вовсе;
+       · пока идёт переход, следующие щелчки не копятся. */
+  var ekrany = Array.prototype.slice.call(document.querySelectorAll('.ekran, #raboty'));
+  var topbar = document.querySelector('.topbar');
+
+  if (ekrany.length > 1) {
+    // высота верхней строки реквизитов: первый экран считается вместе с ней,
+    // иначе страница на неё же выше окна — «умещается сразу» не работает
+    var meritTopbar = function () {
+      var h = topbar ? Math.round(topbar.getBoundingClientRect().height) : 0;
+      document.documentElement.style.setProperty('--topbar-h', h + 'px');
+    };
+    meritTopbar();
+    window.addEventListener('resize', meritTopbar);
+
+    var mysh = window.matchMedia &&
+               window.matchMedia('(min-width:900px) and (pointer:fine)').matches;
+
+    if (mysh && !calmMotion) {
+      var zanyato = false;
+
+      var blizhnij = function () {
+        var y = window.scrollY;
+        var nomer = 0;
+        var raznica = Infinity;
+        for (var i = 0; i < ekrany.length; i++) {
+          var d = Math.abs(ekrany[i].offsetTop - y);
+          if (d < raznica) { raznica = d; nomer = i; }
+        }
+        return nomer;
+      };
+
+      window.addEventListener('wheel', function (e) {
+        if (e.ctrlKey) return;                     // масштабирование не трогаем
+        var granica = ekrany[ekrany.length - 1].offsetTop;
+        if (window.scrollY > granica + 8) return;  // ниже зоны — обычная прокрутка
+
+        var vniz = e.deltaY > 0;
+        var tekushchij = blizhnij();
+        var sledujushchij = tekushchij + (vniz ? 1 : -1);
+
+        // с последнего экрана вниз и с первого вверх — отдаём браузеру
+        if (sledujushchij < 0 || sledujushchij >= ekrany.length) return;
+
+        e.preventDefault();
+        if (zanyato) return;
+        zanyato = true;
+        window.scrollTo({ top: ekrany[sledujushchij].offsetTop, behavior: 'smooth' });
+        setTimeout(function () { zanyato = false; }, 720);
+      }, { passive: false });
+    }
   }
 
   /* --- Появление блоков при прокрутке ------------------------------------ */
@@ -106,7 +174,7 @@
   };
 
   if (counters.length && !calmMotion && 'IntersectionObserver' in window) {
-    var runCount = function (el) {
+    var runCount = function (el, zaderzhka) {
       // единица измерения живёт в отдельном span, её не трогаем
       var unit = el.querySelector('span');
       var host = null;
@@ -122,7 +190,7 @@
       if (!spec) return;
 
       var from = 0;
-      var dur = 900;
+      var dur = 1100;
       var start = null;
 
       var step = function (now) {
@@ -136,13 +204,23 @@
 
       host.textContent = format(0, spec);
       if (unit) unit.style.opacity = '1';
-      requestAnimationFrame(step);
+      // цифры трогаются не разом, а одна за другой — так видно, что они
+      // именно набегают; экран с ведомостью на это и рассчитан
+      setTimeout(function () { requestAnimationFrame(step); }, zaderzhka || 0);
     };
 
     var countObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          runCount(entry.target);
+          var sosedi = entry.target.closest('.ledger');
+          var nomer = 0;
+          if (sosedi) {
+            var vse = sosedi.querySelectorAll('.ledger__val');
+            for (var i = 0; i < vse.length; i++) {
+              if (vse[i] === entry.target) { nomer = i; break; }
+            }
+          }
+          runCount(entry.target, nomer * 140);
           countObserver.unobserve(entry.target);
         }
       });
@@ -355,6 +433,14 @@
     if (val('fPhone').replace(/\D/g, '').length < 10) {
       say('Нужен телефон — по нему проще всего уточнить объёмы.');
       if (phone) phone.focus();
+      return false;
+    }
+    // Согласие ставит человек сам: по 152-ФЗ оно должно быть действием,
+    // а не строчкой рядом с кнопкой. Без галочки заявка не собирается.
+    var agree = document.getElementById('fAgree');
+    if (agree && !agree.checked) {
+      say('Отметьте согласие на обработку персональных данных — без него мы не вправе принять заявку.');
+      agree.focus();
       return false;
     }
     return true;
