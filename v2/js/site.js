@@ -95,174 +95,261 @@
   meritTopbar();
   window.addEventListener('resize', meritTopbar);
 
+  /* Порог 1240, а не 900: ниже этой ширины форма заявки идёт в один
+     столбец и в экран не помещается никак — раздел занимал два экрана,
+     второй выходил почти пустым (проверено на окне 1024×700). На узком
+     окне листание по экранам выключено, там обычная прокрутка. */
   var myshNaShirokom = window.matchMedia &&
-                       window.matchMedia('(min-width:900px) and (pointer:fine)').matches;
+                       window.matchMedia('(min-width:1240px) and (pointer:fine)').matches;
 
   if (myshNaShirokom && !calmMotion) {
     var ostanovki = [];
 
-    var soberiOstanovki = function () {
-      var okno = window.innerHeight;
-      var shapka = masthead ? Math.round(masthead.getBoundingClientRect().height) : 0;
-      var predel = Math.max(0, document.documentElement.scrollHeight - okno);
-      var shag = Math.max(320, okno - shapka - 40);   // нахлёст, чтобы строка не терялась
-      var spisok = [0];
+    /* ------------------------------------------------------------------
+       Страница раскладывается на НАСТОЯЩИЕ экраны.
 
-      /* Блоки раздела: карточки, строки таблицы, объекты, этапы. Крупный
-         узел раскрываем на детей, пока он сам выше экрана, — так до
-         отдельной карточки доходим, а мелочь вроде подписи не дробим. */
-      var soberiBloki = function (koren, rabochee) {
-        var bloki = [];
-        var obhod = function (el, glubina) {
-          Array.prototype.forEach.call(el.children, function (d) {
-            var r = d.getBoundingClientRect();
-            if (r.height < 8) return;
-            if (r.height > rabochee * 0.82 && d.children.length && glubina < 4) {
-              obhod(d, glubina + 1);
-            } else {
-              bloki.push({
-                verh: Math.round(r.top + window.scrollY),
-                niz: Math.round(r.bottom + window.scrollY)
-              });
-            }
-          });
-        };
-        obhod(koren, 0);
-        return bloki.sort(function (a, b) { return a.verh - b.verh; });
-      };
+       Как было и почему это пришлось переделать. Раньше скрипт только
+       выбирал остановки, а вёрстка оставалась сплошной лентой. Остановка
+       ставилась на начало блока, поэтому верхняя кромка вставала ровно,
+       а нижняя падала куда придётся — и снизу вылезала полоска чужого
+       раздела. Владелец 02.09.2026: «одна страница налипает на другую,
+       листаешь — и край одной страницы показывается на другой». Замеры
+       это подтвердили: под цифрами полоса светлого раздела в 45 px,
+       под шестью разделами — 330 px тёмного, под шагами 1–3 торчали
+       заголовки шагов 4–6 на 56 px.
 
-      var razdely = document.querySelectorAll('main > section, .foot');
-      Array.prototype.forEach.call(razdely, function (s) {
-        var verh = Math.round(s.getBoundingClientRect().top + window.scrollY);
-        var nizh = verh + s.offsetHeight;
-        var vychet = s.classList.contains('ekran') ? 0 : shapka;
-        var stop = Math.max(0, verh - vychet);
-        spisok.push(stop);
+       Никакой выбор остановок этого не лечит: текст физически стоит там,
+       где стоит. Поэтому теперь скрипт сам раскладывает страницу
+       по экранам: каждому разделу отмеряется целое число экранов, ряды
+       внутри раздела расставляются так, чтобы ни один не пересекал
+       границу экрана, а остаток высоты уходит в воздух — сверху под
+       шапкой и снизу до края. Границы экранов совпадают с краями окна,
+       поэтому налипать нечему.
 
-        /* Полноэкранный раздел не режем никогда: у него одна остановка —
-           своё начало. Иначе на невысоком окне первый щелчок уводил
-           не на второй экран, а в середину героя: снизу кусок фотографии,
-           сверху кусок цифр. Ужимается такой раздел стилями, а не листанием. */
-        if (s.classList.contains('ekran')) return;
+       Правится только вертикальный воздух: margin-top у первого ряда
+       экрана и высота раздела. Ни один размер шрифта, ни одна колонка
+       не трогаются. На телефоне, тачпаде и при «уменьшить движение»
+       раскладка не применяется вовсе — там обычная лента. */
 
-        if (nizh - verh <= okno - vychet) return;      // раздел влезает целиком
+    var pravki = [];                       // что скрипт менял, чтобы вернуть назад
 
-        var rabochee = okno - shapka;
-        var bloki = soberiBloki(s, rabochee);
-        var strazh = 0;
-
-        /* Первый экран раздела: если ряд карточек не влезает на два-три
-           десятка пикселей, начинаем чуть ниже — съедаем часть верхнего
-           отступа секции, и ряд встаёт целиком. Владелец: «подними выше,
-           и тогда и текст влезет, и три окошка влезут». Больше, чем
-           отступ, не забираем: заголовок должен остаться на экране. */
-        if (bloki.length) {
-          var pervyjVypal = null;
-          for (var n = 0; n < bloki.length; n++) {
-            if (bloki[n].niz > stop + okno) { pervyjVypal = bloki[n]; break; }
-          }
-          if (pervyjVypal) {
-            var nehvatka = pervyjVypal.niz - (stop + okno);
-            var vozduh = bloki[0].verh - stop - shapka;   // отступ секции сверху
-            if (nehvatka > 0 && nehvatka <= vozduh - 20) {
-              stop = Math.round(stop + nehvatka + 10);
-              spisok[spisok.length - 1] = stop;
-            }
-          }
-        }
-
-        while (stop < nizh - okno * 0.5 && strazh++ < 24) {
-          var granica = stop + okno;                   // низ видимой полосы
-          var vypal = null;
-          for (var b = 0; b < bloki.length; b++) {
-            if (bloki[b].verh >= stop - 2 && bloki[b].niz > granica) { vypal = bloki[b]; break; }
-          }
-          if (!vypal) break;                           // хвост раздела виден целиком
-
-          // ставим выпавший блок сразу под шапку
-          var novyj = vypal.verh - shapka - 14;
-
-          /* Верхняя кромка не должна разрезать соседний блок пополам —
-             иначе слева виден обрубленный абзац, а это и есть та «рвань»,
-             из-за которой экран выглядит недоделанным. Если кромка попала
-             внутрь блока, опускаем её до низа этого блока. */
-          var kromka = novyj + shapka;
-          for (var c = 0; c < bloki.length; c++) {
-            var bl = bloki[c];
-            if (bl.verh < kromka - 4 && bl.niz > kromka + 24 && bl.niz - bl.verh < rabochee) {
-              novyj = bl.niz - shapka + 14;
-              break;
-            }
-          }
-
-          // блок сам выше экрана (длинная таблица, форма) — обычный шаг
-          if (novyj <= stop + 60) novyj = stop + shag;
-          stop = Math.round(novyj);
-          spisok.push(stop);
-        }
-      });
-      spisok.push(predel);
-
-      /* Остановки ближе 140 px друг к другу сливаем: иначе в хвосте страницы
-         получались два-три щелчка на 20 px, и человек думал, что листание
-         сломалось. Последней всегда остаётся низ страницы. */
-      spisok = spisok
-        .map(function (v) { return Math.min(Math.max(0, Math.round(v)), predel); })
-        .sort(function (a, b) { return a - b; })
-        .filter(function (v, i, m) { return i === 0 || v - m[i - 1] > 140; });
-      /* Хвост страницы: всё, что ближе 220 px к самому низу, выбрасываем
-         и ставим одну остановку — низ. Иначе последними шли два щелчка
-         по 20 px, и человек думал, что листание заело. */
-      while (spisok.length && spisok[spisok.length - 1] > predel - 220) spisok.pop();
-      spisok.push(predel);
-
-      /* Главное требование владельца: «чтобы ни часть текста не потерялась».
-         Остановка показывает полосу от себя и на высоту окна вниз, поэтому
-         шаг длиннее окна означает пропущенную полосу — так на главной один
-         переход перепрыгивал 1157 px при окне 900, и 257 px текста никто
-         бы не увидел. Поэтому длинные промежутки делим на равные шаги
-         не длиннее экрана. Промежуток ровно в экран не трогаем: это стык
-         двух полноэкранных разделов, там ничего не теряется. */
-      var rovno = [];
-      for (var i = 0; i < spisok.length; i++) {
-        rovno.push(spisok[i]);
-        if (i + 1 < spisok.length) {
-          var razryv = spisok[i + 1] - spisok[i];
-          if (razryv > okno) {
-            var chastey = Math.ceil(razryv / Math.max(240, okno - 40));
-            for (var q = 1; q < chastey; q++) {
-              rovno.push(Math.round(spisok[i] + razryv * q / chastey));
-            }
-          }
-        }
-      }
-
-      ostanovki = rovno.sort(function (a, b) { return a - b; });
+    var pripisat = function (el, svoystvo, znachenie) {
+      pravki.push({ el: el, svoystvo: svoystvo, bylo: el.style[svoystvo] });
+      el.style[svoystvo] = znachenie;
     };
 
-    soberiOstanovki();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(soberiOstanovki);
-    window.addEventListener('load', soberiOstanovki);
+    var snyat = function () {
+      for (var i = pravki.length - 1; i >= 0; i--) {
+        pravki[i].el.style[pravki[i].svoystvo] = pravki[i].bylo;
+      }
+      pravki = [];
+    };
 
-    /* Страница растёт по ходу листания: фотографии разделов грузятся лениво,
-       и высота документа меняется уже после первого расчёта. Без пересчёта
-       в хвосте оставалась остановка от старой высоты, и последние два щелчка
-       шли по 20 px. Следим за высотой и пересобираем остановки. */
-    if ('ResizeObserver' in window) {
-      var byloVysota = document.documentElement.scrollHeight;
-      var ro = new ResizeObserver(function () {
-        var stalo = document.documentElement.scrollHeight;
-        if (Math.abs(stalo - byloVysota) > 8) {
-          byloVysota = stalo;
-          soberiOstanovki();
+    var verhDok = function (el) {
+      return Math.round(el.getBoundingClientRect().top + window.scrollY);
+    };
+    var nizDok = function (el) {
+      return Math.round(el.getBoundingClientRect().bottom + window.scrollY);
+    };
+    var otstupSverhu = function (el) {
+      return parseFloat(window.getComputedStyle(el).marginTop) || 0;
+    };
+
+    /* Ленты карточек делятся между экранами всегда, даже если целиком
+       влезают: владелец просил показывать их рядами — «заголовок и три
+       вкладочки на одной странице, оставшиеся три на другой». Без этого
+       списка шесть шагов оставались одним куском, заголовок уезжал
+       на отдельный экран и висел там в пустоте. */
+    var DELIMYE = '.works, .etapy, .reasons, .objects, .cards, .ledger, .foot__grid';
+
+    /* А это, наоборот, не дробится никогда. Форма — единое целое: когда
+       скрипт разобрал её на поля, ряды перепутались с левой колонкой,
+       заголовок «Заявка на расчёт» ушёл под шапку, а следом остался
+       пустой чёрный экран (окно 1536×776, снимок 02.09.2026). То же
+       и с разрезом объекта, таблицей и полосой призыва. */
+    var NEDELIMYE = 'form, .request, .cutaway, .tablewrap, .cta-strip, ' +
+                    '.detail, .pagehead .shell, .polosa__inner';
+
+    /* Ряды раздела: то, что человек читает как одну строку. Узел выше
+       рабочей полосы раскрываем на детей — так от ленты карточек доходим
+       до отдельной карточки, а заголовочный блок не дробим. Абсолютные
+       слои (фотография полосы) рядом не считаются: они не в потоке. */
+    var sobratRyady = function (koren, polezno) {
+      var bloki = [];
+      var obhod = function (el, glubina) {
+        Array.prototype.forEach.call(el.children, function (d) {
+          var st = window.getComputedStyle(d);
+          if (st.position === 'absolute' || st.position === 'fixed') return;
+          if (st.display === 'none') return;
+          var r = d.getBoundingClientRect();
+          if (r.height < 8) return;
+          if (d.children.length && glubina < 4 && !d.matches(NEDELIMYE) &&
+              (r.height > polezno * 0.9 || d.matches(DELIMYE))) {
+            obhod(d, glubina + 1);
+            return;
+          }
+          bloki.push({
+            el: d,
+            verh: Math.round(r.top + window.scrollY),
+            niz: Math.round(r.bottom + window.scrollY)
+          });
+        });
+      };
+      obhod(koren, 0);
+      bloki.sort(function (a, b) { return a.verh - b.verh; });
+
+      var ryady = [];
+      bloki.forEach(function (b) {
+        var last = ryady[ryady.length - 1];
+        if (last && Math.abs(b.verh - last.verh) < 6) {
+          last.eli.push(b.el);
+          last.niz = Math.max(last.niz, b.niz);
+        } else {
+          ryady.push({ eli: [b.el], verh: b.verh, niz: b.niz });
         }
       });
-      ro.observe(document.body);
-    }
+      return ryady;
+    };
+
+    var VOZDUH = 18;                        // меньше этого под шапкой не оставляем
+
+    var razlozhit = function () {
+      snyat();
+
+      var okno = window.innerHeight;
+      var shapka = masthead ? Math.round(masthead.getBoundingClientRect().height) : 0;
+      var polezno = okno - shapka;          // полоса под шапкой, где живёт содержимое
+      ostanovki = [];
+      if (polezno < 300) return;            // окно совсем низкое — не раскладываем
+
+      var uzly = Array.prototype.slice.call(
+        document.querySelectorAll('main > section, .foot'));
+      var granica = 0;                      // верх текущего экрана в координатах страницы
+
+      uzly.forEach(function (s, nomer) {
+        var verh = verhDok(s);
+
+        /* Раздел всегда начинается ровно с края экрана: тогда весь экран
+           окрашен фоном одного раздела и стык не виден. */
+        if (nomer > 0 && verh !== granica) {
+          pripisat(s, 'marginTop', (otstupSverhu(s) + (granica - verh)) + 'px');
+          verh = verhDok(s);
+        }
+
+        var konec = verh;                   // низ последнего ряда раздела
+
+        if (s.classList.contains('ekran')) {
+          /* Полноэкранный раздел рассчитан ровно на окно: над ним может
+             стоять верхняя строка реквизитов, её высоту вычитаем. */
+          pripisat(s, 'minHeight', (granica + okno - verh) + 'px');
+          konec = nizDok(s);
+        } else {
+          var ryady = sobratRyady(s, polezno);
+          var i = 0;
+          var ekran = 0;
+
+          while (i < ryady.length) {
+            /* Сколько рядов влезает в этот экран, считая от первого. */
+            var k = i;
+            var mesto = polezno - VOZDUH * 2;
+            while (k + 1 < ryady.length &&
+                   ryady[k + 1].niz - ryady[i].verh <= mesto) k++;
+
+            var vysota = ryady[k].niz - ryady[i].verh;
+            var svobodno = polezno - vysota;
+            /* Остаток высоты делим: 38 % над содержимым, остальное под ним.
+               Так ряд не прижат к шапке и не висит в пустоте. А если
+               содержимого меньше половины полосы (короткий раздел вроде
+               полосы призыва), ставим его ровно по центру — тогда пустота
+               читается как замысел, а не как обрыв.
+
+               Когда свободного места в обрез, воздух делим поровну и не
+               берём больше, чем есть: иначе ряд вылезал за нижнюю кромку
+               на десяток пикселей, раздел получал лишний экран, и за
+               заявкой шла пустая чёрная страница (окно 1536×776). */
+            var dolya = vysota < polezno * 0.5 ? 0.5 : 0.38;
+            var vozduh;
+            if (svobodno <= 4) vozduh = 2;                    // ряд выше полосы
+            else if (svobodno < VOZDUH * 2) vozduh = Math.floor(svobodno / 2);
+            else vozduh = Math.round(VOZDUH + (svobodno - VOZDUH) * dolya);
+
+            var cel = granica + ekran * okno + shapka + vozduh;
+            var delta = cel - ryady[i].verh;
+            if (delta !== 0) {
+              ryady[i].eli.forEach(function (el) {
+                pripisat(el, 'marginTop', (otstupSverhu(el) + delta) + 'px');
+              });
+              /* Всё, что ниже, уехало на ту же величину — сверяемся
+                 с настоящей раскладкой, а не с арифметикой. */
+              var stalo = verhDok(ryady[i].eli[0]);
+              var popravka = stalo - ryady[i].verh;
+              for (var q = i; q < ryady.length; q++) {
+                ryady[q].verh += popravka;
+                ryady[q].niz += popravka;
+              }
+            }
+
+            /* Ряд выше экрана (длинная таблица, форма) занимает столько
+               экранов, сколько ему нужно, — иначе он уехал бы за край. */
+            var zanyal = Math.max(1, Math.ceil(
+              (ryady[k].niz - (granica + ekran * okno)) / okno));
+            ekran += zanyal;
+            konec = ryady[k].niz;
+            i = k + 1;
+          }
+        }
+
+        /* Низ раздела ставим ровно на границу экрана: свой нижний отступ
+           убираем, нужную высоту добираем через min-height — фон при этом
+           остаётся фоном раздела, а не просветом страницы. */
+        var ekranov = Math.max(1, Math.ceil((konec - granica) / okno));
+        var celNiz = granica + ekranov * okno;
+        pripisat(s, 'paddingBottom', '0px');
+        pripisat(s, 'minHeight', (celNiz - verh) + 'px');
+        var fakt = nizDok(s);
+        if (fakt !== celNiz) {                 // осталась чужая рамка или отступ
+          pripisat(s, 'minHeight', (celNiz - verh - (fakt - celNiz)) + 'px');
+        }
+
+        granica = celNiz;
+      });
+
+      /* Остановки — просто края экранов. Последняя не может быть ниже,
+         чем позволяет прокрутка. */
+      var predel = Math.max(0, document.documentElement.scrollHeight - okno);
+      for (var e = 0; e <= granica - okno + 1; e += okno) {
+        ostanovki.push(Math.min(e, predel));
+      }
+      if (!ostanovki.length || ostanovki[ostanovki.length - 1] < predel - 2) {
+        ostanovki.push(predel);
+      }
+    };
+
+    razlozhit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(razlozhit);
+    window.addEventListener('load', razlozhit);
+
+    /* Фотографии разделов помечены `loading="lazy"`, и высота карточки
+       меняется в тот момент, когда снимок наконец пришёл, — то есть уже
+       после расчёта. В режиме экранов это недопустимо: раскладка обязана
+       быть готова до первого щелчка колеса. Поэтому здесь ленивую загрузку
+       отменяем (на телефоне она остаётся) и пересчитываем по каждому
+       пришедшему снимку. Слежения за высотой документа нет намеренно:
+       расчёт сам её меняет и вызвал бы себя по кругу. */
+    var kartinki = Array.prototype.slice.call(document.querySelectorAll('main img'));
+    var poZagruzke = null;
+    kartinki.forEach(function (im) {
+      if (im.loading === 'lazy') im.loading = 'eager';
+      if (im.complete) return;
+      im.addEventListener('load', function () {
+        clearTimeout(poZagruzke);
+        poZagruzke = setTimeout(razlozhit, 60);
+      });
+    });
     var schetchik = null;
     window.addEventListener('resize', function () {
       clearTimeout(schetchik);
-      schetchik = setTimeout(soberiOstanovki, 200);
+      schetchik = setTimeout(razlozhit, 200);
     });
 
     // поле, внутри которого есть что прокручивать, забирает колесо себе

@@ -531,8 +531,19 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 
 /* --- Ведомость цифр ------------------------------------------------------ */
 .ledger{ display:grid; gap:1px; background:var(--liniya-t); border-block:1px solid var(--liniya-t); }
-@media(min-width:720px){ .ledger{ grid-template-columns:repeat(2,1fr); } }
-@media(min-width:1080px){ .ledger{ grid-template-columns:repeat(5,1fr); } }
+@media(min-width:720px){
+  .ledger{ grid-template-columns:repeat(2,1fr); }
+  /* Нечётная последняя строка занимает обе колонки: иначе рядом с ней
+     оставалась пустая ячейка, и в ней светился фон сетки. */
+  .ledger__row:last-child:nth-child(odd){ grid-column:1 / -1; }
+}
+/* Колонок ровно столько, сколько строк. Жёсткий repeat(5) был рассчитан
+   на главную; на странице объектов строк четыре, и справа висела пустая
+   серая плашка — видно на контрольном снимке 02.09.2026. */
+@media(min-width:1080px){
+  .ledger{ grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:1fr; }
+  .ledger__row:last-child:nth-child(odd){ grid-column:auto; }
+}
 .ledger__row{ background:var(--grafit); padding:1.6rem 1.4rem; display:grid; gap:.5rem; align-content:start; }
 .ledger__key{
   font-family:var(--mono); font-size:.72rem; letter-spacing:.15em;
@@ -973,9 +984,13 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   .form__legend, .form__hint, .form__legal{ grid-column:1 / -1; }
   /* пары «имя+организация» и «телефон+почта» разбираются на отдельные поля */
   .form .field__row{ display:contents; }
-  .form > .field:nth-of-type(3){ grid-column:3; }   /* объект */
-  .form > .field:nth-of-type(4){ grid-column:1 / 3; } /* разделы */
-  .form > .field:nth-of-type(5){ grid-column:1 / -1; } /* что посчитать */
+  /* Объект занимает две колонки, разделы — все три. Раньше объект стоял
+     в одной третьей колонке: рядом с почтой зияла пустая ячейка, а сам
+     подпись «Адрес или название, этажность» не влезала и обрезалась.
+     У разделов пустовала третья колонка — то же самое с другого края. */
+  .form > .field:nth-of-type(3){ grid-column:2 / -1; }  /* объект */
+  .form > .field:nth-of-type(4){ grid-column:1 / -1; }  /* разделы */
+  .form > .field:nth-of-type(5){ grid-column:1 / -1; }  /* что посчитать */
   .form textarea{ min-height:64px; }
   /* Подсказку под заголовком на широком экране убираем: те же слова есть
      в подписях полей, а раздел должен уместиться в экран целиком. */
@@ -1125,6 +1140,41 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   .etap h3{ font-size:1.25rem; }
   #etapy .head{ margin-bottom:2rem; }
 
+  /* Пять шагов — в один ряд. На странице услуг шагов ровно пять, и при
+     трёх колонках второй ряд состоял из двух карточек: они прижимались
+     влево, а половина экрана пустовала. Шесть шагов главной сюда
+     не попадают и остаются тремя плюс тремя. */
+  .etapy:has(> :nth-child(5):last-child){
+    grid-template-columns:repeat(5, minmax(0,1fr)); gap:1rem;
+  }
+  .etapy:has(> :nth-child(5):last-child) .etap{ padding:1.7rem 1.25rem; }
+  .etapy:has(> :nth-child(5):last-child) .etap h3{ font-size:1.08rem; }
+  .etapy:has(> :nth-child(5):last-child) .etap p{ font-size:.94rem; }
+  .etapy:has(> :nth-child(5):last-child) .etap__srok{ font-size:.76rem; }
+
+  /* Фотография раздела услуг не выше половины окна: на низком экране
+     она одна съедала всю рабочую полосу, раздел переставал помещаться
+     и следом шла пустая страница (окно 1280×640). */
+  .detail__foto{ max-height:46vh; }
+
+  /* --- Короткие разделы, которым достался целый экран -------------------
+     В режиме листания по экранам раздел занимает целое число экранов.
+     Два коротких раздела от этого проиграли: полоса призыва «Пришлите
+     проект» и одинокая ведомость цифр на странице объектов — обе высотой
+     около двухсот пикселей — оказывались посреди пустого экрана и
+     выглядели забытыми. Кегль не трогаем, добавляем вес: внутренние
+     поля и размер цифр считаются от высоты окна. */
+  .cta-strip{ padding:min(3.4rem, 7vh) clamp(1.8rem,1.4rem + 2vw,3rem); gap:2rem; }
+  .cta-strip h3{ font-size:min(var(--sh-2), 4.6vh); }
+  .cta-strip p{ margin-top:1rem; font-size:min(1.05rem, 2.1vh); }
+
+  .section:has(> .shell > .ledger:only-child) .ledger__row{
+    padding-block:min(3.4rem, 7vh);
+  }
+  .section:has(> .shell > .ledger:only-child) .ledger__val{
+    font-size:min(clamp(3rem, 2rem + 3.4vw, 5rem), 10vh);
+  }
+
   /* Знак в шапке стал крупным, и меню начало ломаться на две строки.
      Пункты и телефон не переносим, промежутки ужимаем, а на окне уже
      1400 px телефон из шапки убираем — он есть строкой выше и в кнопке. */
@@ -1149,6 +1199,40 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   #vypolneno .lede{ font-size:min(1.05rem, 2vh); }
   #vypolneno .object{ padding-block:min(1rem, .55vh); }
   .cards .card{ padding-block:min(1.25rem, 1.1vh); }
+}
+
+/* --- Невысокий ноутбучный экран ------------------------------------------
+   Ниже 760 px рабочая полоса под шапкой остаётся всего в 600 пикселей,
+   и раздел заявки перестаёт помещаться: хвост уезжает на следующий экран,
+   а тот выходит почти пустым. Ужимаем только отступы и междустрочье —
+   кегль полей не трогаем, мельчить текст владелец запретил. Порог 760,
+   а не 800: при масштабе 125 % окно владельца равно 776, и там всё
+   помещается без этого ужатия. */
+@media (min-width:900px) and (max-height:760px){
+  .form{ padding:min(1.7rem, 2.4vh) clamp(1.2rem,.8rem + 1.6vw,2rem);
+         gap:min(.7rem, 1vh) 1rem; }
+  .form__legend{ font-size:min(1.5rem, 3vh); }
+  .field label{ font-size:.68rem; }
+  .field input, .field textarea{ padding-block:min(.62rem, .85vh); }
+  .form textarea{ min-height:min(60px, 6.5vh); }
+  .soglasie{ padding-block:min(.7rem, 1vh); margin-top:.1rem; font-size:.84rem; }
+  .form__legal{ font-size:min(.78rem, 1.5vh); margin-top:.3rem; }
+  .check{ padding-block:.42rem; }
+  .contactlist a{ padding-block:min(.7rem, 1.1vh); }
+  .request__aside .lede{ font-size:min(1rem, 2vh); }
+}
+
+/* Совсем низкое окно (640 и ниже): рабочая полоса 528 px, а заявке нужно
+   576. Дожимаем недостающие полсотни пикселей — снова только отступами
+   и высотой поля для текста. */
+@media (min-width:900px) and (max-height:700px){
+  .form{ padding-block:min(1.2rem, 1.2vh); gap:min(.45rem, .55vh) 1rem; }
+  .form textarea{ min-height:min(44px, 4.4vh); }
+  .field input, .field textarea{ padding-block:min(.55rem, .7vh); }
+  .soglasie{ padding-block:min(.6rem, .8vh); }
+  .form__send{ gap:.4rem; }
+  .contactlist{ margin-top:min(1.2rem, 1.4vh); }
+  .cta-strip{ padding-block:min(2.2rem, 5vh); }
 }
 
 @media (max-width:1400px){
