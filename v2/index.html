@@ -62,7 +62,7 @@
 
 <!-- ── Герой: фотография во весь экран ────────────────────────────────── -->
 <section class="hero ekran">
-  <div class="hero__foto" style="background-image:url('img/geroy.jpg')" role="img" aria-label="Строящийся жилой дом"></div>
+  <div class="hero__foto" style="background-image:url('img/geroy.jpg')" role="img" aria-label="Квартал многоэтажной жилой застройки вечером"></div>
   <div class="shell hero__inner">
     <h1>Инженерные системы дома <em>под один договор</em></h1>
     <p class="hero__lede">
@@ -121,8 +121,6 @@
         <p class="ledger__note">Досрочная сдача отдельных работ к графику.</p>
       </div>
     </div>
-
-    <p class="ledger__foot">Подтверждающие документы по каждой цифре предоставим по запросу.</p>
   </div>
 </section>
 
@@ -190,13 +188,12 @@
 
       <a class="work work--em" href="uslugi.html#em">
         <span class="work__foto">
-          <img src="img/em.jpg" alt="Электрощитовое оборудование" loading="lazy" width="900" height="600">
+          <img src="img/em.jpg" alt="Шкафы главного распределительного щита в щитовой здания" loading="lazy" width="1200" height="800">
           <span class="work__code">ЭМ</span>
         </span>
         <span class="work__body">
           <h3>Электромонтажные работы</h3>
           <p>ВРУ, ГРЩ и этажные щиты, кабельные линии, освещение и розеточные сети, заземление, молниезащита, пусконаладка.</p>
-          <span class="work__soon">Развиваемое направление</span>
         </span>
         <span class="work__more">Подробнее →</span>
       </a>
@@ -209,7 +206,6 @@
         <span class="work__body">
           <h3>Гидроизоляционные работы</h3>
           <p>Плита основания, стены подвала, узлы ввода сетей: гидроизоляция конструкций и инженерных сооружений.</p>
-          <span class="work__soon">Развиваемое направление</span>
         </span>
         <span class="work__more">Подробнее →</span>
       </a>
@@ -349,7 +345,7 @@
           <g class="zone" data-zone="em"
              data-code="ЭМ · щитовая и кабельные линии"
              data-title="Электромонтажные работы"
-             data-text="ВРУ, ГРЩ и этажные щиты, кабельные линии, освещение и розеточные сети, заземление, молниезащита, пусконаладка. Развиваемое направление компании.">
+             data-text="ВРУ, ГРЩ и этажные щиты, кабельные линии, освещение и розеточные сети, заземление, молниезащита, пусконаладка.">
             <g class="zone__art">
               <rect x="304" y="352" width="30" height="44" fill="rgba(255,214,102,.14)" stroke="#FFD666" stroke-width="1.5"/>
               <path d="M319 352 V132" stroke="#FFD666" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
@@ -386,7 +382,7 @@
           <g class="zone" data-zone="gi"
              data-code="ГИ · основание и стены подвала"
              data-title="Гидроизоляционные работы"
-             data-text="Гидроизоляция конструкций и инженерных сооружений: плита основания, стены подвала, узлы ввода сетей. Развиваемое направление компании.">
+             data-text="Гидроизоляция конструкций и инженерных сооружений: плита основания, стены подвала, узлы ввода сетей.">
             <g class="zone__art">
               <rect x="195" y="455" width="310" height="13" fill="url(#hatch)" stroke="#A8B6C4" stroke-width="1.2"/>
               <path d="M200 455 V400 M500 455 V400" stroke="#A8B6C4" stroke-width="3" opacity=".55"/>
@@ -545,8 +541,7 @@
     <p class="tablenote">
       Ещё два договора в исполнении: тепловой пункт с узлом коммерческого учёта
       и автоматикой на жилом доме и отопление административного здания
-      с подземной парковкой. Номера договоров, заказчиков и суммы предоставляем
-      по запросу — в переписке, а не на общедоступной странице.
+      с подземной парковкой.
     </p>
   </div>
 </section>
@@ -734,6 +729,16 @@
         <textarea id="fText" name="text" placeholder="Есть проект и ведомость объёмов работ, нужны сроки и стоимость по секциям 1–3"></textarea>
       </div>
 
+      <!-- Согласие стоит ПЕРЕД кнопками: заказчик 02.09.2026 голосом —
+           «человек должен всё ввести, дать согласие, а потом уже отправлять
+           почтой либо в МАКС». Пока галочки нет, кнопки отправки заперты. -->
+      <label class="soglasie" id="soglasieBox">
+        <input type="checkbox" id="fAgree" name="agree" required>
+        <span>Я даю согласие на обработку персональных данных, указанных в этой форме,
+          для ответа на обращение — в порядке <a href="politika.html">политики обработки
+          персональных данных</a> и Федерального закона от 27.07.2006 № 152-ФЗ.</span>
+      </label>
+
       <div class="form__send">
         <div class="form__split">
           <button class="btn" type="button" data-send="mail">Отправить почтой</button>
@@ -742,13 +747,6 @@
         <button class="btn btn--ghost btn--wide" type="button" data-send="copy">Скопировать текст заявки</button>
         <p class="form__status" id="formStatus" role="status"></p>
       </div>
-
-      <label class="soglasie">
-        <input type="checkbox" id="fAgree" name="agree" required>
-        <span>Я даю согласие на обработку персональных данных, указанных в этой форме,
-          для ответа на обращение — в порядке <a href="politika.html">политики обработки
-          персональных данных</a> и Федерального закона от 27.07.2006 № 152-ФЗ.</span>
-      </label>
       <p class="form__legal">
         Проект или ведомость объёмов приложите к письму — так расчёт будет точнее.
         Данные никуда не отправляются с сайта: форма собирает текст письма,

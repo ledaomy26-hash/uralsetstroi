@@ -390,6 +390,33 @@
 
   var say = function (msg) { if (status) status.textContent = msg; };
 
+  /* --- Согласие запирает отправку ----------------------------------------
+     Заказчик 02.09.2026 голосом: «не должна срабатывать отправка без согласия
+     на обработку персональных данных». Проверка в check() была и раньше,
+     но по кнопкам этого не было видно — теперь пока галочки нет, обе кнопки
+     отправки притушены, а сам блок согласия подсвечивается при попытке. */
+  var agreeBox = document.getElementById('fAgree');
+  var soglasie = document.getElementById('soglasieBox');
+  var sendButtons = Array.prototype.slice.call(
+    form.querySelectorAll('[data-send="mail"], [data-send="max"]'));
+
+  /* Кнопку именно притушаем, а не отключаем атрибутом: отключённая кнопка
+     выпадает из обхода с клавиатуры и молчит в ответ на нажатие — человек
+     не понимает, чего от него хотят. Здесь она нажимается и отвечает
+     подсказкой, а отправку не пускает проверка в check(). */
+  var syncLock = function () {
+    var ok = !agreeBox || agreeBox.checked;
+    sendButtons.forEach(function (b) { b.classList.toggle('is-locked', !ok); });
+    if (ok) {
+      if (soglasie) soglasie.classList.remove('is-nado');
+      // упрёк про согласие снимаем сразу, как только галочка поставлена
+      if (status && status.textContent.indexOf('согласие') > -1) say('');
+    }
+  };
+
+  if (agreeBox) agreeBox.addEventListener('change', syncLock);
+  syncLock();
+
   var val = function (id) {
     var el = document.getElementById(id);
     return el ? el.value.trim() : '';
@@ -437,10 +464,14 @@
     }
     // Согласие ставит человек сам: по 152-ФЗ оно должно быть действием,
     // а не строчкой рядом с кнопкой. Без галочки заявка не собирается.
-    var agree = document.getElementById('fAgree');
-    if (agree && !agree.checked) {
+    if (agreeBox && !agreeBox.checked) {
       say('Отметьте согласие на обработку персональных данных — без него мы не вправе принять заявку.');
-      agree.focus();
+      if (soglasie) {
+        soglasie.classList.remove('is-nado');
+        void soglasie.offsetWidth;          // перезапуск подсветки при повторном нажатии
+        soglasie.classList.add('is-nado');
+      }
+      agreeBox.focus();
       return false;
     }
     return true;

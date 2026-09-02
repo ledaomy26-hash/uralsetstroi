@@ -417,10 +417,6 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .work--vk .work__code{ background:rgba(47,102,144,.9); }   /* вода — единственный синий */
 .work__body{ padding:1.3rem 1.4rem 1.5rem; display:grid; gap:.6rem; align-content:start; }
 .work__body p{ color:var(--tush-2); font-size:.96rem; }
-.work__soon{
-  font-family:var(--mono); font-size:.66rem; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--latun); margin-top:.2rem;
-}
 .work__more{
   margin-top:auto; padding:0 1.4rem 1.3rem;
   font-family:var(--mono); font-size:.72rem; letter-spacing:.12em;
@@ -817,23 +813,53 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 /* --- Согласие на обработку данных ---------------------------------------
    По 152-ФЗ согласие должно быть отдельным действием человека, а не
    строкой рядом с кнопкой: галочку ставит он сам, без неё заявка
-   не собирается (проверка в site.js). */
+   не собирается (проверка в site.js).
+
+   Правка 02.09.2026. Заказчик голосом: «кнопку, где даю согласие, не выделил,
+   опять всё не видно, на белом фоне белая там; она хотя бы по периметру,
+   чтобы выделена была». Так и было: квадратик рисовался белой рамкой
+   rgba(255,255,255,.34) — расчёт на тёмный фон, а форма светлая, поэтому
+   на бумаге он исчезал совсем. Теперь у блока своя рамка и подложка,
+   а сам квадрат обведён тушью в два пикселя. */
 .soglasie{
-  display:flex; gap:.8rem; align-items:flex-start;
-  margin-top:1.4rem; cursor:pointer;
-  font-size:.9rem; line-height:1.55; color:#AEB6BF;
+  display:flex; gap:.85rem; align-items:flex-start;
+  margin-top:1.2rem; cursor:pointer;
+  padding:.95rem 1.1rem;
+  border:1px solid var(--liniya-2); border-radius:var(--radius);
+  background:var(--bumaga);
+  font-size:.9rem; line-height:1.55; color:var(--tush-2);
+  transition:border-color .18s var(--plavno), background .18s var(--plavno);
 }
+.soglasie:hover{ border-color:var(--latun-2); }
 .soglasie input{
   appearance:none; -webkit-appearance:none;
-  flex:none; width:20px; height:20px; margin-top:.15rem;
-  border:1px solid rgba(255,255,255,.34); border-radius:4px;
-  background:transparent; cursor:pointer;
+  flex:none; width:22px; height:22px; margin-top:.05rem;
+  border:2px solid var(--tush-3); border-radius:4px;
+  background:#fff; cursor:pointer;
   transition:background .18s var(--plavno), border-color .18s var(--plavno);
 }
 .soglasie input:checked{ background:var(--latun-2); border-color:var(--latun-2); }
 .soglasie input:checked::after{
-  content:""; display:block; width:6px; height:11px; margin:2px auto 0;
+  content:""; display:block; width:6px; height:12px; margin:1px auto 0;
   border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg);
 }
-.soglasie a{ color:var(--latun-sv); }
+.soglasie input:focus-visible{ outline:2px solid var(--latun-2); outline-offset:2px; }
+.soglasie a{ color:var(--latun); }
+/* Нажали «Отправить» без галочки — блок подсвечивается, чтобы было понятно,
+   чего от человека ждут. Гаснет, как только галочка поставлена. */
+.soglasie.is-nado{
+  border-color:var(--latun-2); background:rgba(168,122,51,.10);
+  animation:soglasie-vzglyad .5s var(--plavno) 2;
+}
+.soglasie.is-nado input{ border-color:var(--latun-2); }
+@keyframes soglasie-vzglyad{ 50%{ background:rgba(168,122,51,.22); } }
+@media (prefers-reduced-motion:reduce){ .soglasie.is-nado{ animation:none; } }
+
+/* Кнопки отправки заперты, пока согласия нет: заказчик просил, чтобы
+   «отправка не срабатывала без согласия». Кнопка при этом остаётся
+   доступной для нажатия — иначе человек не поймёт, почему ничего
+   не происходит; она отвечает подсказкой и подсвечивает согласие. */
+.btn.is-locked{ opacity:.55; }
+.btn.is-locked:hover{ opacity:.75; }
+
 .form__legal{ margin-top:1rem; }

@@ -158,6 +158,16 @@
         <textarea id="fText" name="text" placeholder="Есть проект и ведомость объёмов работ, нужны сроки и стоимость по секциям 1–3"></textarea>
       </div>
 
+      <!-- Согласие стоит ПЕРЕД кнопками: заказчик 02.09.2026 голосом —
+           «человек должен всё ввести, дать согласие, а потом уже отправлять
+           почтой либо в МАКС». Пока галочки нет, кнопки отправки заперты. -->
+      <label class="soglasie" id="soglasieBox">
+        <input type="checkbox" id="fAgree" name="agree" required>
+        <span>Я даю согласие на обработку персональных данных, указанных в этой форме,
+          для ответа на обращение — в порядке <a href="politika.html">политики обработки
+          персональных данных</a> и Федерального закона от 27.07.2006 № 152-ФЗ.</span>
+      </label>
+
       <div class="form__send">
         <div class="form__split">
           <button class="btn" type="button" data-send="mail">Отправить почтой</button>
@@ -166,13 +176,6 @@
         <button class="btn btn--ghost btn--wide" type="button" data-send="copy">Скопировать текст заявки</button>
         <p class="form__status" id="formStatus" role="status"></p>
       </div>
-
-      <label class="soglasie">
-        <input type="checkbox" id="fAgree" name="agree" required>
-        <span>Я даю согласие на обработку персональных данных, указанных в этой форме,
-          для ответа на обращение — в порядке <a href="politika.html">политики обработки
-          персональных данных</a> и Федерального закона от 27.07.2006 № 152-ФЗ.</span>
-      </label>
       <p class="form__legal">
         Проект или ведомость объёмов приложите к письму — так расчёт будет точнее.
         Данные никуда не отправляются с сайта: форма собирает текст письма,
