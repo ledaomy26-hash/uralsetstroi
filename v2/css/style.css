@@ -493,6 +493,31 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 }
 .tablenote{ margin-top:1.2rem; color:var(--tush-2); font-size:.95rem; max-width:76ch; }
 
+/* --- Реквизиты: левая колонка — подпись, правая — значение ---------------- */
+/* Заказчик поймал это 02.09.2026: в общем стиле таблицы заголовки строк
+   идут тем же мелким блёклым моношрифтом, что и шапка обычной таблицы,
+   а из значений цветом выделены только ИНН, КПП и ОГРН. Читается плохо:
+   «всё остальное как-то на сером». Здесь колонки разведены — подпись
+   спокойная и мелкая, значение крупное и тёмное. */
+.spec--rekvizity{ min-width:0; }
+.spec--rekvizity th[scope="row"]{
+  width:34%; font-family:var(--sans); font-size:.9rem; font-weight:400;
+  letter-spacing:0; text-transform:none; color:var(--tush-2);
+  white-space:normal; vertical-align:top; padding:1rem 1.4rem;
+}
+.spec--rekvizity td{
+  font-size:1.02rem; color:var(--grafit); font-weight:500;
+}
+.spec--rekvizity td.doc{
+  font-family:var(--mono); font-size:1.02rem; color:var(--grafit);
+  letter-spacing:.02em;
+}
+.spec--rekvizity td a{ color:var(--latun); }
+@media (max-width:640px){
+  .spec--rekvizity th[scope="row"]{ width:42%; font-size:.84rem; padding:.8rem 1rem; }
+  .spec--rekvizity td{ padding:.8rem 1rem; font-size:.95rem; }
+}
+
 /* --- Объекты: список без фотографий -------------------------------------- */
 /* Фотографий объектов у компании нет, а ставить чужие снимки под подпись
    «наш объект» нельзя. Поэтому здесь только текст — и он сильный:
@@ -571,12 +596,17 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .checks{ display:flex; flex-wrap:wrap; gap:.5rem; }
 .check{ position:relative; }
 .check input{ position:absolute; opacity:0; width:0; height:0; }
+/* Невыбранный тег раньше был почти невидим на тёмной форме — заказчик просил
+   02.09.2026, чтобы разделы «как-то цветом выделялись». Теперь у него своя
+   подложка и латунная буква, а выбранный заливается латунью целиком. */
 .check span{
   display:inline-flex; align-items:center; justify-content:center;
   font-family:var(--mono); font-size:.82rem; letter-spacing:.06em;
-  padding:.5rem .9rem; border:1px solid var(--liniya-2); border-radius:999px;
+  padding:.5rem .95rem; border:1px solid var(--latun-2); border-radius:999px;
+  background:rgba(168,122,51,.12); color:var(--latun);
   cursor:pointer; transition:border-color .2s, background .2s, color .2s;
 }
+.check span:hover{ background:rgba(168,122,51,.22); }
 .check input:checked + span{ border-color:var(--latun-2); background:var(--latun-2); color:#fff; }
 .check input:focus-visible + span{ outline:2px solid var(--latun-2); outline-offset:2px; }
 .form__send{ display:grid; gap:.7rem; }
