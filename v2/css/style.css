@@ -81,6 +81,13 @@ body{
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
+/* `overflow-x:hidden` делает body контейнером прокрутки, и все position:sticky
+   внутри перестают липнуть — из-за этого левая колонка заявки уезжала вверх,
+   и на втором этапе листания слева оставалась пустота. `clip` режет так же,
+   но контейнером прокрутки не становится. */
+@supports (overflow:clip){
+  body{ overflow-x:clip; }
+}
 
 img,svg,video{ max-width:100%; display:block; }
 a{ color:inherit; }
@@ -209,7 +216,9 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    отдельно, и владелец просил ничего больше не трогать. */
 .brand{ display:flex; align-items:center; gap:.85rem; text-decoration:none; margin-right:auto; }
 .brand__mark{ height:38px; width:auto; }
-.masthead .brand__mark{ height:68px; }
+.masthead .brand__mark{ height:78px; }
+/* На окне поуже знак меньше: иначе он подпирает меню. */
+@media (max-width:1240px){ .masthead .brand__mark{ height:60px; } }
 .brand__text{ display:grid; gap:.1rem; }
 .brand__name{
   font-family:var(--antikva); font-weight:600; font-size:1.32rem;
@@ -276,10 +285,10 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero{
   position:relative;
   min-height:min(100svh, 860px);
-  /* шапка лежит поверх кадра; отступ равен её высоте — 68 px знак
+  /* шапка лежит поверх кадра; отступ равен её высоте — 78 px знак
      плюс padding-block .85rem сверху и снизу */
-  margin-top:-96px;
-  padding-top:96px;
+  margin-top:-106px;
+  padding-top:106px;
   display:flex; align-items:flex-end;
   color:#fff;
   overflow:hidden;
@@ -300,6 +309,28 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 /* Медленный наезд вместо видео: у ФОДД на первом экране ролик, но
    ролик — это мегабайты и звук, а движение читается почти так же. */
 @keyframes naezd{ to{ transform:scale(1); } }
+
+/* Вход первого экрана: заголовок, подзаголовок и кнопки проявляются один
+   за другим, пока кадр медленно наезжает. Добавлено 02.09.2026 по просьбе
+   владельца «чтобы анимации были красивые, чтобы выглядело роскошно».
+   Сдвиг маленький (18 px) и кривая мягкая: движение должно чувствоваться,
+   а не бросаться в глаза. */
+@keyframes vhod{
+  from{ opacity:0; transform:translateY(18px); }
+  to{ opacity:1; transform:none; }
+}
+.js .hero h1,
+.js .hero__lede,
+.js .hero__actions{
+  opacity:0;
+  animation:vhod .9s var(--plavno) forwards;
+}
+.js .hero h1{ animation-delay:.15s; }
+.js .hero__lede{ animation-delay:.35s; }
+.js .hero__actions{ animation-delay:.55s; }
+@media (prefers-reduced-motion:reduce){
+  .js .hero h1, .js .hero__lede, .js .hero__actions{ opacity:1; animation:none; }
+}
 /* Затемнение клином слева направо, а не ровно сверху вниз.
    Правка 02.09.2026, вечер. Владелец: «опять надпись сливается с картинкой,
    картинка мне нравится уже». Ровное затемнение по вертикали не спасает:
@@ -327,20 +358,30 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
                                        rgba(11,13,16,.90) 100%);
   }
 }
-/* Отступы героя ужаты: при окне 900 px содержимое вылезало за нижний край
-   на 11 px, и первый экран переставал помещаться целиком — замерено. */
-.hero__inner{ position:relative; z-index:2; width:100%; padding-block:clamp(1.8rem,1.4rem + 2.6vw,4rem); }
-.hero h1{ max-width:16ch; }
+/* Первый экран считается ПО ВЫСОТЕ ОКНА, а не только по ширине.
+   Правка 02.09.2026, вечер. Прежний расчёт держался на ширине, и при окне
+   900 px всё сходилось — а на окне 800 px (обычный ноутбук) содержимое
+   героя вырастало до 855 px, первый экран переставал помещаться, и щелчок
+   колеса уводил не на второй экран, а в середину: снизу кусок героя, сверху
+   кусок цифр. Поэтому кегль заголовка и все отступы героя ограничены
+   ещё и долей высоты окна: min(обычный размер, N vh). На высоком экране
+   ничего не меняется, на низком герой ужимается сам. */
+.hero__inner{
+  position:relative; z-index:2; width:100%;
+  padding-block:min(clamp(1.8rem,1.4rem + 2.6vw,4rem), 3.4vh);
+}
+.hero h1{ max-width:16ch; font-size:min(var(--sh-4), 9.4vh); }
 .hero h1 em{ font-style:normal; color:var(--latun-sv); display:block; }
 .hero__lede{
-  margin-top:1.6rem; max-width:56ch; font-size:var(--sh-1);
+  margin-top:min(1.6rem, 2.4vh); max-width:56ch;
+  font-size:min(var(--sh-1), 2.5vh);
   color:rgba(255,255,255,.86); line-height:1.6;
 }
-.hero__actions{ display:flex; flex-wrap:wrap; gap:.8rem; margin-top:2.2rem; }
+.hero__actions{ display:flex; flex-wrap:wrap; gap:.8rem; margin-top:min(2.2rem, 3.2vh); }
 .hero__facts{
-  display:flex; flex-wrap:wrap; gap:1.6rem 2.6rem;
-  margin-top:clamp(1.6rem,1.2rem + 2.2vw,3.2rem);
-  padding-top:1.2rem; border-top:1px solid rgba(255,255,255,.2);
+  display:flex; flex-wrap:wrap; gap:min(1.6rem,2vh) 2.6rem;
+  margin-top:min(clamp(1.6rem,1.2rem + 2.2vw,3.2rem), 3vh);
+  padding-top:min(1.2rem, 1.8vh); border-top:1px solid rgba(255,255,255,.2);
 }
 .hero__fact{ display:grid; gap:.15rem; }
 .hero__fact b{
@@ -599,6 +640,9 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .request{ display:grid; gap:clamp(1.8rem,1.2rem + 3vw,3.6rem); }
 @media(min-width:980px){ .request{ grid-template-columns:.9fr 1.1fr; align-items:start; } }
 .contactlist{ display:grid; gap:.7rem; margin-top:2rem; }
+/* Липкую левую колонку в заявке пробовали и отказались: раздел выше экрана,
+   и на втором этапе колонка прилипала обрубленной — сверху висели три строки
+   абзаца. Чистый тёмный фон рядом с формой выглядит спокойнее обрубка. */
 .contactlist a{
   display:flex; align-items:center; gap:.9rem; text-decoration:none;
   padding:.9rem 1.1rem; border:1px solid var(--liniya-t); border-radius:var(--radius);
@@ -830,6 +874,17 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .ekran--cifry{ display:flex; align-items:center; }
 .ekran--cifry > .shell{ width:100%; }
 
+/* Экран отдан цифрам целиком, поэтому и цифры должны быть на весь экран.
+   Правка 02.09.2026, вечер: раньше блок занимал треть высоты, сверху и снизу
+   оставалось по 280 px пустоты, и после первого экрана это читалось как
+   недоделанная страница. Размеры привязаны к высоте окна: на высоком экране
+   числа крупнее и строки просторнее, на низком всё ужимается само. */
+.ekran--cifry .head{ margin-bottom:min(3.6rem, 8vh); }
+.ekran--cifry .ledger__row{ padding:min(4rem, 8.5vh) 1.4rem; gap:min(1.1rem, 2vh); }
+.ekran--cifry .ledger__val{ font-size:min(clamp(3.2rem, 2.2rem + 3.6vw, 5.4rem), 11vh); }
+.ekran--cifry .ledger__key{ font-size:.76rem; }
+.ekran--cifry .ledger__note{ font-size:.92rem; }
+
 /* Подсказка, что страница листается по экранам. Гаснет, как только
    человек тронул колесо: дальше она только мешает. */
 /* Стоит справа, а не по центру: по центру подсказка ложилась прямо
@@ -903,6 +958,31 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .btn.is-locked:hover{ opacity:.75; }
 
 .form__legal{ margin-top:1rem; }
+
+/* --- Заявка на широком экране: форма в две колонки ----------------------
+   Раздел заявки был единственным на главной, который не помещался в экран
+   и рвался на два этапа: сверху хвост формы, слева пустое поле. Владелец
+   02.09.2026: «посмотри, что можно вместить в одну страницу, не сильно
+   ужав — тогда умещаем». Кегль и поля остались прежние, изменилась только
+   раскладка: объект и разделы встали в один ряд, согласие — рядом
+   с кнопками. Ниже 1240 px раскладка прежняя, в один столбец. */
+@media (min-width:1240px){
+  .form{ grid-template-columns:1fr 1fr; align-items:start; gap:1rem 1.4rem; }
+  .form__legend, .form__hint, .form .field__row,
+  .form > .field:nth-of-type(3) ~ .field:last-of-type,
+  .form__legal{ grid-column:1 / -1; }
+  /* объект — слева, разделы — справа */
+  .form > .field:nth-of-type(3){ grid-column:1; }
+  .form > .field:nth-of-type(4){ grid-column:2; }
+  /* «что нужно посчитать» — во всю ширину, ниже */
+  .form > .field:nth-of-type(5){ grid-column:1 / -1; }
+  .form textarea{ min-height:84px; }
+  /* Согласие и кнопки — во всю ширину: в узкой колонке текст согласия
+     ломался на три слова в строку и читался как лапша. */
+  .soglasie{ grid-column:1 / -1; margin-top:.2rem; }
+  .form__send{ grid-column:1 / -1; }
+  .form__legal{ margin-top:.4rem; }
+}
 
 /* --- Разделы ужаты под экран --------------------------------------------
    Правка 02.09.2026, вечер, вместе с листанием по всему сайту. Владелец:

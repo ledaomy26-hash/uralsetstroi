@@ -86,6 +86,11 @@
   var meritTopbar = function () {
     var h = topbar ? Math.round(topbar.getBoundingClientRect().height) : 0;
     document.documentElement.style.setProperty('--topbar-h', h + 'px');
+    // высоту шапки знает стиль липкой колонки заявки
+    if (masthead) {
+      document.documentElement.style.setProperty(
+        '--shapka-h', Math.round(masthead.getBoundingClientRect().height) + 'px');
+    }
   };
   meritTopbar();
   window.addEventListener('resize', meritTopbar);
@@ -134,6 +139,12 @@
         var stop = Math.max(0, verh - vychet);
         spisok.push(stop);
 
+        /* Полноэкранный раздел не режем никогда: у него одна остановка —
+           своё начало. Иначе на невысоком окне первый щелчок уводил
+           не на второй экран, а в середину героя: снизу кусок фотографии,
+           сверху кусок цифр. Ужимается такой раздел стилями, а не листанием. */
+        if (s.classList.contains('ekran')) return;
+
         if (nizh - verh <= okno - vychet) return;      // раздел влезает целиком
 
         var rabochee = okno - shapka;
@@ -170,6 +181,20 @@
 
           // ставим выпавший блок сразу под шапку
           var novyj = vypal.verh - shapka - 14;
+
+          /* Верхняя кромка не должна разрезать соседний блок пополам —
+             иначе слева виден обрубленный абзац, а это и есть та «рвань»,
+             из-за которой экран выглядит недоделанным. Если кромка попала
+             внутрь блока, опускаем её до низа этого блока. */
+          var kromka = novyj + shapka;
+          for (var c = 0; c < bloki.length; c++) {
+            var bl = bloki[c];
+            if (bl.verh < kromka - 4 && bl.niz > kromka + 24 && bl.niz - bl.verh < rabochee) {
+              novyj = bl.niz - shapka + 14;
+              break;
+            }
+          }
+
           // блок сам выше экрана (длинная таблица, форма) — обычный шаг
           if (novyj <= stop + 60) novyj = stop + shag;
           stop = Math.round(novyj);
@@ -185,8 +210,11 @@
         .map(function (v) { return Math.min(Math.max(0, Math.round(v)), predel); })
         .sort(function (a, b) { return a - b; })
         .filter(function (v, i, m) { return i === 0 || v - m[i - 1] > 140; });
-      if (spisok[spisok.length - 1] < predel - 140) spisok.push(predel);
-      else spisok[spisok.length - 1] = predel;
+      /* Хвост страницы: всё, что ближе 220 px к самому низу, выбрасываем
+         и ставим одну остановку — низ. Иначе последними шли два щелчка
+         по 20 px, и человек думал, что листание заело. */
+      while (spisok.length && spisok[spisok.length - 1] > predel - 220) spisok.pop();
+      spisok.push(predel);
 
       /* Главное требование владельца: «чтобы ни часть текста не потерялась».
          Остановка показывает полосу от себя и на высоту окна вниз, поэтому
@@ -215,6 +243,22 @@
     soberiOstanovki();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(soberiOstanovki);
     window.addEventListener('load', soberiOstanovki);
+
+    /* Страница растёт по ходу листания: фотографии разделов грузятся лениво,
+       и высота документа меняется уже после первого расчёта. Без пересчёта
+       в хвосте оставалась остановка от старой высоты, и последние два щелчка
+       шли по 20 px. Следим за высотой и пересобираем остановки. */
+    if ('ResizeObserver' in window) {
+      var byloVysota = document.documentElement.scrollHeight;
+      var ro = new ResizeObserver(function () {
+        var stalo = document.documentElement.scrollHeight;
+        if (Math.abs(stalo - byloVysota) > 8) {
+          byloVysota = stalo;
+          soberiOstanovki();
+        }
+      });
+      ro.observe(document.body);
+    }
     var schetchik = null;
     window.addEventListener('resize', function () {
       clearTimeout(schetchik);
@@ -232,6 +276,29 @@
     };
 
     var zanyato = false;
+
+    /* Переход между экранами ведём сами, а не браузерным `smooth`.
+       У браузера своя кривая и своя длительность, и на длинном прыжке
+       страница дёргается. Здесь одна и та же мягкая кривая на любой
+       дистанции: сперва разгон, потом долгое торможение — движение
+       читается как «страница уехала», а не «скачок». */
+    var pereyti = function (cel) {
+      var start = window.scrollY;
+      var put = cel - start;
+      var dlit = Math.max(520, Math.min(820, 380 + Math.abs(put) * 0.35));
+      var t0 = null;
+
+      var shag = function (now) {
+        if (t0 === null) t0 = now;
+        var p = Math.min(1, (now - t0) / dlit);
+        // ease-in-out: 0.5 - cos(pi*p)/2, но с уклоном в торможение
+        var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        window.scrollTo(0, Math.round(start + put * e));
+        if (p < 1) requestAnimationFrame(shag);
+        else zanyato = false;
+      };
+      requestAnimationFrame(shag);
+    };
 
     window.addEventListener('wheel', function (e) {
       if (e.ctrlKey) return;                       // масштабирование не трогаем
@@ -258,8 +325,7 @@
       e.preventDefault();
       if (zanyato) return;
       zanyato = true;
-      window.scrollTo({ top: cel, behavior: 'smooth' });
-      setTimeout(function () { zanyato = false; }, 620);
+      pereyti(cel);
     }, { passive: false });
   }
 
