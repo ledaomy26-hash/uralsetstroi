@@ -1,11 +1,11 @@
 /* ==========================================================================
    ООО «УРАЛСЕТЬСТРОЙ» — поведение сайта
-   Ничего лишнего: меню, разрез объекта, сбор заявки в письмо или WhatsApp.
+   Ничего лишнего: меню, разрез объекта, сбор заявки в письмо или в MAX.
    ========================================================================== */
 (function () {
   'use strict';
 
-  var PHONE_WA = '79068125444';
+  var PHONE = '79068125444';        /* для подсказки: по этому номеру находят в MAX */
   var MAIL = 'uralsetstroi96@mail.ru';
 
   /* --- Меню на узком экране --------------------------------------------- */
@@ -39,9 +39,383 @@
   if (masthead) {
     var onScroll = function () {
       masthead.classList.toggle('is-stuck', window.scrollY > 8);
+      document.body.classList.toggle('is-scrolled', window.scrollY > 40);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  var calmMotion = window.matchMedia &&
+                   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* --- Листание этапами: по всему сайту ----------------------------------
+     Сначала (01.09.2026) листались только первые экраны главной: владелец
+     просил «крутнул колёсиком — спустился на вторую, и видно, как
+     выставляются цифры». 02.09.2026 он попросил то же самое на всех
+     страницах: «а мы так по всему сайту можем сделать? есть места, которые
+     не умещаются на одну страницу, но ничего страшного, главное, чтобы оно
+     листалось этапами».
+
+     Штатный scroll-snap так не умеет: при mandatory щелчок колеса в 120 px
+     не перекрывает высоту экрана, и браузер возвращает страницу на место
+     (измерено: scrollY 33 при следующем экране на 911). Поэтому остановки
+     считает скрипт.
+
+     Как считаются остановки:
+       · начало каждого раздела страницы плюс подвал;
+       · раздел выше окна режется НЕ ровным шагом, а по границам блоков:
+         следующая остановка встаёт на верх первой карточки (строки,
+         объекта), которая целиком не поместилась. Владелец 02.09.2026:
+         «подними выше — тогда и текст влезет, и три окошка влезут,
+         а другое на вторую перенесётся… чтобы выглядело аккуратно».
+         Ровный шаг резал ряд карточек пополам, и это выглядело поломкой;
+       · у полноэкранных разделов (.ekran) высота шапки не вычитается:
+         они рассчитаны ровно на экран. У обычных — вычитается, иначе
+         прилипшая шапка накрыла бы заголовок.
+
+     Границы, за которые листание не выходит:
+       · только мышь на широком экране — на телефоне и тачпаде с инерцией
+         перехват мешает, там прокрутка остаётся обычной;
+       · мелкие щелчки тачпада (меньше 12 px) не трогаем вовсе;
+       · внутри прокручиваемого поля (текст заявки, таблица) — обычная
+         прокрутка;
+       · при системном «уменьшить движение» не работает;
+       · пока идёт переход, следующие щелчки не копятся. */
+  var topbar = document.querySelector('.topbar');
+
+  var meritTopbar = function () {
+    var h = topbar ? Math.round(topbar.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+    // высоту шапки знает стиль липкой колонки заявки
+    if (masthead) {
+      document.documentElement.style.setProperty(
+        '--shapka-h', Math.round(masthead.getBoundingClientRect().height) + 'px');
+    }
+  };
+  meritTopbar();
+  window.addEventListener('resize', meritTopbar);
+
+  /* Порог 1240, а не 900: ниже этой ширины форма заявки идёт в один
+     столбец и в экран не помещается никак — раздел занимал два экрана,
+     второй выходил почти пустым (проверено на окне 1024×700). На узком
+     окне листание по экранам выключено, там обычная прокрутка. */
+  var myshNaShirokom = window.matchMedia &&
+                       window.matchMedia('(min-width:1240px) and (pointer:fine)').matches;
+
+  if (myshNaShirokom && !calmMotion) {
+    var ostanovki = [];
+
+    /* ------------------------------------------------------------------
+       Страница раскладывается на НАСТОЯЩИЕ экраны.
+
+       Как было и почему это пришлось переделать. Раньше скрипт только
+       выбирал остановки, а вёрстка оставалась сплошной лентой. Остановка
+       ставилась на начало блока, поэтому верхняя кромка вставала ровно,
+       а нижняя падала куда придётся — и снизу вылезала полоска чужого
+       раздела. Владелец 02.09.2026: «одна страница налипает на другую,
+       листаешь — и край одной страницы показывается на другой». Замеры
+       это подтвердили: под цифрами полоса светлого раздела в 45 px,
+       под шестью разделами — 330 px тёмного, под шагами 1–3 торчали
+       заголовки шагов 4–6 на 56 px.
+
+       Никакой выбор остановок этого не лечит: текст физически стоит там,
+       где стоит. Поэтому теперь скрипт сам раскладывает страницу
+       по экранам: каждому разделу отмеряется целое число экранов, ряды
+       внутри раздела расставляются так, чтобы ни один не пересекал
+       границу экрана, а остаток высоты уходит в воздух — сверху под
+       шапкой и снизу до края. Границы экранов совпадают с краями окна,
+       поэтому налипать нечему.
+
+       Правится только вертикальный воздух: margin-top у первого ряда
+       экрана и высота раздела. Ни один размер шрифта, ни одна колонка
+       не трогаются. На телефоне, тачпаде и при «уменьшить движение»
+       раскладка не применяется вовсе — там обычная лента. */
+
+    var pravki = [];                       // что скрипт менял, чтобы вернуть назад
+
+    var pripisat = function (el, svoystvo, znachenie) {
+      pravki.push({ el: el, svoystvo: svoystvo, bylo: el.style[svoystvo] });
+      el.style[svoystvo] = znachenie;
+    };
+
+    var snyat = function () {
+      for (var i = pravki.length - 1; i >= 0; i--) {
+        pravki[i].el.style[pravki[i].svoystvo] = pravki[i].bylo;
+      }
+      pravki = [];
+    };
+
+    var verhDok = function (el) {
+      return Math.round(el.getBoundingClientRect().top + window.scrollY);
+    };
+    var nizDok = function (el) {
+      return Math.round(el.getBoundingClientRect().bottom + window.scrollY);
+    };
+    var otstupSverhu = function (el) {
+      return parseFloat(window.getComputedStyle(el).marginTop) || 0;
+    };
+
+    /* Ленты карточек делятся между экранами всегда, даже если целиком
+       влезают: владелец просил показывать их рядами — «заголовок и три
+       вкладочки на одной странице, оставшиеся три на другой». Без этого
+       списка шесть шагов оставались одним куском, заголовок уезжал
+       на отдельный экран и висел там в пустоте. */
+    var DELIMYE = '.works, .etapy, .reasons, .objects, .cards, .ledger, .foot__grid';
+
+    /* А это, наоборот, не дробится никогда. Форма — единое целое: когда
+       скрипт разобрал её на поля, ряды перепутались с левой колонкой,
+       заголовок «Заявка на расчёт» ушёл под шапку, а следом остался
+       пустой чёрный экран (окно 1536×776, снимок 02.09.2026). То же
+       и с разрезом объекта, таблицей и полосой призыва. */
+    var NEDELIMYE = 'form, .request, .cutaway, .tablewrap, .cta-strip, ' +
+                    '.detail, .pagehead .shell, .polosa__inner';
+
+    /* Ряды раздела: то, что человек читает как одну строку. Узел выше
+       рабочей полосы раскрываем на детей — так от ленты карточек доходим
+       до отдельной карточки, а заголовочный блок не дробим. Абсолютные
+       слои (фотография полосы) рядом не считаются: они не в потоке. */
+    var sobratRyady = function (koren, polezno) {
+      var bloki = [];
+      var obhod = function (el, glubina) {
+        Array.prototype.forEach.call(el.children, function (d) {
+          var st = window.getComputedStyle(d);
+          if (st.position === 'absolute' || st.position === 'fixed') return;
+          if (st.display === 'none') return;
+          var r = d.getBoundingClientRect();
+          if (r.height < 8) return;
+          if (d.children.length && glubina < 4 && !d.matches(NEDELIMYE) &&
+              (r.height > polezno * 0.9 || d.matches(DELIMYE))) {
+            obhod(d, glubina + 1);
+            return;
+          }
+          bloki.push({
+            el: d,
+            verh: Math.round(r.top + window.scrollY),
+            niz: Math.round(r.bottom + window.scrollY)
+          });
+        });
+      };
+      obhod(koren, 0);
+      bloki.sort(function (a, b) { return a.verh - b.verh; });
+
+      var ryady = [];
+      bloki.forEach(function (b) {
+        var last = ryady[ryady.length - 1];
+        if (last && Math.abs(b.verh - last.verh) < 6) {
+          last.eli.push(b.el);
+          last.niz = Math.max(last.niz, b.niz);
+        } else {
+          ryady.push({ eli: [b.el], verh: b.verh, niz: b.niz });
+        }
+      });
+      return ryady;
+    };
+
+    var VOZDUH = 18;                        // меньше этого под шапкой не оставляем
+
+    var razlozhit = function () {
+      snyat();
+
+      var okno = window.innerHeight;
+      var shapka = masthead ? Math.round(masthead.getBoundingClientRect().height) : 0;
+      var polezno = okno - shapka;          // полоса под шапкой, где живёт содержимое
+      ostanovki = [];
+      if (polezno < 300) return;            // окно совсем низкое — не раскладываем
+
+      var uzly = Array.prototype.slice.call(
+        document.querySelectorAll('main > section, .foot'));
+      var granica = 0;                      // верх текущего экрана в координатах страницы
+
+      uzly.forEach(function (s, nomer) {
+        var verh = verhDok(s);
+
+        /* Раздел всегда начинается ровно с края экрана: тогда весь экран
+           окрашен фоном одного раздела и стык не виден. */
+        if (nomer > 0 && verh !== granica) {
+          pripisat(s, 'marginTop', (otstupSverhu(s) + (granica - verh)) + 'px');
+          verh = verhDok(s);
+        }
+
+        var konec = verh;                   // низ последнего ряда раздела
+
+        if (s.classList.contains('ekran')) {
+          /* Полноэкранный раздел рассчитан ровно на окно: над ним может
+             стоять верхняя строка реквизитов, её высоту вычитаем. */
+          pripisat(s, 'minHeight', (granica + okno - verh) + 'px');
+          konec = nizDok(s);
+        } else {
+          var ryady = sobratRyady(s, polezno);
+          var i = 0;
+          var ekran = 0;
+
+          while (i < ryady.length) {
+            /* Сколько рядов влезает в этот экран, считая от первого. */
+            var k = i;
+            var mesto = polezno - VOZDUH * 2;
+            while (k + 1 < ryady.length &&
+                   ryady[k + 1].niz - ryady[i].verh <= mesto) k++;
+
+            var vysota = ryady[k].niz - ryady[i].verh;
+            var svobodno = polezno - vysota;
+            /* Остаток высоты делим: 38 % над содержимым, остальное под ним.
+               Так ряд не прижат к шапке и не висит в пустоте. А если
+               содержимого меньше половины полосы (короткий раздел вроде
+               полосы призыва), ставим его ровно по центру — тогда пустота
+               читается как замысел, а не как обрыв.
+
+               Когда свободного места в обрез, воздух делим поровну и не
+               берём больше, чем есть: иначе ряд вылезал за нижнюю кромку
+               на десяток пикселей, раздел получал лишний экран, и за
+               заявкой шла пустая чёрная страница (окно 1536×776). */
+            var dolya = vysota < polezno * 0.5 ? 0.5 : 0.38;
+            var vozduh;
+            if (svobodno <= 4) vozduh = 2;                    // ряд выше полосы
+            else if (svobodno < VOZDUH * 2) vozduh = Math.floor(svobodno / 2);
+            else vozduh = Math.round(VOZDUH + (svobodno - VOZDUH) * dolya);
+
+            var cel = granica + ekran * okno + shapka + vozduh;
+            var delta = cel - ryady[i].verh;
+            if (delta !== 0) {
+              ryady[i].eli.forEach(function (el) {
+                pripisat(el, 'marginTop', (otstupSverhu(el) + delta) + 'px');
+              });
+              /* Всё, что ниже, уехало на ту же величину — сверяемся
+                 с настоящей раскладкой, а не с арифметикой. */
+              var stalo = verhDok(ryady[i].eli[0]);
+              var popravka = stalo - ryady[i].verh;
+              for (var q = i; q < ryady.length; q++) {
+                ryady[q].verh += popravka;
+                ryady[q].niz += popravka;
+              }
+            }
+
+            /* Ряд выше экрана (длинная таблица, форма) занимает столько
+               экранов, сколько ему нужно, — иначе он уехал бы за край. */
+            var zanyal = Math.max(1, Math.ceil(
+              (ryady[k].niz - (granica + ekran * okno)) / okno));
+            ekran += zanyal;
+            konec = ryady[k].niz;
+            i = k + 1;
+          }
+        }
+
+        /* Низ раздела ставим ровно на границу экрана: свой нижний отступ
+           убираем, нужную высоту добираем через min-height — фон при этом
+           остаётся фоном раздела, а не просветом страницы. */
+        var ekranov = Math.max(1, Math.ceil((konec - granica) / okno));
+        var celNiz = granica + ekranov * okno;
+        pripisat(s, 'paddingBottom', '0px');
+        pripisat(s, 'minHeight', (celNiz - verh) + 'px');
+        var fakt = nizDok(s);
+        if (fakt !== celNiz) {                 // осталась чужая рамка или отступ
+          pripisat(s, 'minHeight', (celNiz - verh - (fakt - celNiz)) + 'px');
+        }
+
+        granica = celNiz;
+      });
+
+      /* Остановки — просто края экранов. Последняя не может быть ниже,
+         чем позволяет прокрутка. */
+      var predel = Math.max(0, document.documentElement.scrollHeight - okno);
+      for (var e = 0; e <= granica - okno + 1; e += okno) {
+        ostanovki.push(Math.min(e, predel));
+      }
+      if (!ostanovki.length || ostanovki[ostanovki.length - 1] < predel - 2) {
+        ostanovki.push(predel);
+      }
+    };
+
+    razlozhit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(razlozhit);
+    window.addEventListener('load', razlozhit);
+
+    /* Фотографии разделов помечены `loading="lazy"`, и высота карточки
+       меняется в тот момент, когда снимок наконец пришёл, — то есть уже
+       после расчёта. В режиме экранов это недопустимо: раскладка обязана
+       быть готова до первого щелчка колеса. Поэтому здесь ленивую загрузку
+       отменяем (на телефоне она остаётся) и пересчитываем по каждому
+       пришедшему снимку. Слежения за высотой документа нет намеренно:
+       расчёт сам её меняет и вызвал бы себя по кругу. */
+    var kartinki = Array.prototype.slice.call(document.querySelectorAll('main img'));
+    var poZagruzke = null;
+    kartinki.forEach(function (im) {
+      if (im.loading === 'lazy') im.loading = 'eager';
+      if (im.complete) return;
+      im.addEventListener('load', function () {
+        clearTimeout(poZagruzke);
+        poZagruzke = setTimeout(razlozhit, 60);
+      });
+    });
+    var schetchik = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(schetchik);
+      schetchik = setTimeout(razlozhit, 200);
+    });
+
+    // поле, внутри которого есть что прокручивать, забирает колесо себе
+    var vnutriProkrutki = function (el) {
+      while (el && el !== document.body && el.nodeType === 1) {
+        var st = window.getComputedStyle(el);
+        if (/(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 4) return true;
+        el = el.parentElement;
+      }
+      return false;
+    };
+
+    var zanyato = false;
+
+    /* Переход между экранами ведём сами, а не браузерным `smooth`.
+       У браузера своя кривая и своя длительность, и на длинном прыжке
+       страница дёргается. Здесь одна и та же мягкая кривая на любой
+       дистанции: сперва разгон, потом долгое торможение — движение
+       читается как «страница уехала», а не «скачок». */
+    var pereyti = function (cel) {
+      var start = window.scrollY;
+      var put = cel - start;
+      /* Быстро, но плавно. Первая версия тянулась до 0,82 с — владелец:
+         «лиснул колесиком и слишком долго жду». Теперь 0,3–0,42 с. */
+      var dlit = Math.max(300, Math.min(420, 240 + Math.abs(put) * 0.14));
+      var t0 = null;
+
+      var shag = function (now) {
+        if (t0 === null) t0 = now;
+        var p = Math.min(1, (now - t0) / dlit);
+        // ease-in-out: 0.5 - cos(pi*p)/2, но с уклоном в торможение
+        var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        window.scrollTo(0, Math.round(start + put * e));
+        if (p < 1) requestAnimationFrame(shag);
+        else zanyato = false;
+      };
+      requestAnimationFrame(shag);
+    };
+
+    window.addEventListener('wheel', function (e) {
+      if (e.ctrlKey) return;                       // масштабирование не трогаем
+      if (Math.abs(e.deltaY) < 12) return;         // мелкая крошка тачпада
+      if (vnutriProkrutki(e.target)) return;
+      if (ostanovki.length < 2) return;
+
+      var y = window.scrollY;
+      var vniz = e.deltaY > 0;
+      var cel = null;
+
+      if (vniz) {
+        for (var i = 0; i < ostanovki.length; i++) {
+          if (ostanovki[i] > y + 8) { cel = ostanovki[i]; break; }
+        }
+      } else {
+        for (var j = ostanovki.length - 1; j >= 0; j--) {
+          if (ostanovki[j] < y - 8) { cel = ostanovki[j]; break; }
+        }
+      }
+
+      if (cel === null) return;                    // край страницы — отдаём браузеру
+
+      e.preventDefault();
+      if (zanyato) return;
+      zanyato = true;
+      pereyti(cel);
+    }, { passive: false });
   }
 
   /* --- Появление блоков при прокрутке ------------------------------------ */
@@ -61,8 +435,6 @@
       revealables.forEach(function (el) { io.observe(el); });
     }
   }
-
-  var calmMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* --- Чертёж прорисовывается при загрузке ------------------------------- */
   var strokes = document.querySelectorAll('.cutaway .draw');
@@ -106,7 +478,7 @@
   };
 
   if (counters.length && !calmMotion && 'IntersectionObserver' in window) {
-    var runCount = function (el) {
+    var runCount = function (el, zaderzhka) {
       // единица измерения живёт в отдельном span, её не трогаем
       var unit = el.querySelector('span');
       var host = null;
@@ -122,7 +494,7 @@
       if (!spec) return;
 
       var from = 0;
-      var dur = 900;
+      var dur = 1100;
       var start = null;
 
       var step = function (now) {
@@ -136,13 +508,23 @@
 
       host.textContent = format(0, spec);
       if (unit) unit.style.opacity = '1';
-      requestAnimationFrame(step);
+      // цифры трогаются не разом, а одна за другой — так видно, что они
+      // именно набегают; экран с ведомостью на это и рассчитан
+      setTimeout(function () { requestAnimationFrame(step); }, zaderzhka || 0);
     };
 
     var countObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          runCount(entry.target);
+          var sosedi = entry.target.closest('.ledger');
+          var nomer = 0;
+          if (sosedi) {
+            var vse = sosedi.querySelectorAll('.ledger__val');
+            for (var i = 0; i < vse.length; i++) {
+              if (vse[i] === entry.target) { nomer = i; break; }
+            }
+          }
+          runCount(entry.target, nomer * 140);
           countObserver.unobserve(entry.target);
         }
       });
@@ -304,13 +686,40 @@
        Те же шесть разделов идут ниже обычными ссылками — там всё доступно. */
   }
 
-  /* --- Заявка: собираем текст и отдаём в почту или WhatsApp -------------- */
+  /* --- Заявка: собираем текст и отдаём в почту или в MAX ----------------- */
   var form = document.getElementById('requestForm');
   if (!form) return;
 
   var status = document.getElementById('formStatus');
 
   var say = function (msg) { if (status) status.textContent = msg; };
+
+  /* --- Согласие запирает отправку ----------------------------------------
+     Заказчик 02.09.2026 голосом: «не должна срабатывать отправка без согласия
+     на обработку персональных данных». Проверка в check() была и раньше,
+     но по кнопкам этого не было видно — теперь пока галочки нет, обе кнопки
+     отправки притушены, а сам блок согласия подсвечивается при попытке. */
+  var agreeBox = document.getElementById('fAgree');
+  var soglasie = document.getElementById('soglasieBox');
+  var sendButtons = Array.prototype.slice.call(
+    form.querySelectorAll('[data-send="mail"], [data-send="max"]'));
+
+  /* Кнопку именно притушаем, а не отключаем атрибутом: отключённая кнопка
+     выпадает из обхода с клавиатуры и молчит в ответ на нажатие — человек
+     не понимает, чего от него хотят. Здесь она нажимается и отвечает
+     подсказкой, а отправку не пускает проверка в check(). */
+  var syncLock = function () {
+    var ok = !agreeBox || agreeBox.checked;
+    sendButtons.forEach(function (b) { b.classList.toggle('is-locked', !ok); });
+    if (ok) {
+      if (soglasie) soglasie.classList.remove('is-nado');
+      // упрёк про согласие снимаем сразу, как только галочка поставлена
+      if (status && status.textContent.indexOf('согласие') > -1) say('');
+    }
+  };
+
+  if (agreeBox) agreeBox.addEventListener('change', syncLock);
+  syncLock();
 
   var val = function (id) {
     var el = document.getElementById(id);
@@ -357,6 +766,18 @@
       if (phone) phone.focus();
       return false;
     }
+    // Согласие ставит человек сам: по 152-ФЗ оно должно быть действием,
+    // а не строчкой рядом с кнопкой. Без галочки заявка не собирается.
+    if (agreeBox && !agreeBox.checked) {
+      say('Отметьте согласие на обработку персональных данных — без него мы не вправе принять заявку.');
+      if (soglasie) {
+        soglasie.classList.remove('is-nado');
+        void soglasie.offsetWidth;          // перезапуск подсветки при повторном нажатии
+        soglasie.classList.add('is-nado');
+      }
+      agreeBox.focus();
+      return false;
+    }
     return true;
   };
 
@@ -390,9 +811,14 @@
         say('Открываем почту. Проверьте письмо и нажмите «Отправить».');
       }
 
-      if (mode === 'whatsapp') {
-        window.open('https://wa.me/' + PHONE_WA + '?text=' + encodeURIComponent(body), '_blank', 'noopener');
-        say('Открываем WhatsApp. Проверьте сообщение и нажмите «Отправить».');
+      /* MAX вместо WhatsApp — по просьбе заказчика 02.09.2026.
+         Прямой ссылки «написать по номеру», как wa.me, у MAX нет: мессенджер
+         её не предусматривает. Официальный диплинк один — :share, он открывает
+         экран «Отправить в MAX» с уже подставленным текстом, а чат человек
+         выбирает сам. Поэтому в подсказке сразу сказано, кого выбирать. */
+      if (mode === 'max') {
+        window.open('https://max.ru/:share?text=' + encodeURIComponent(body), '_blank', 'noopener');
+        say('Открываем MAX. Выберите чат «Уралсетьстрой» или найдите нас по номеру +7 906 812-54-44.');
       }
     });
   });

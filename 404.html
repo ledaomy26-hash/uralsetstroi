@@ -4,82 +4,148 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Страница не найдена | Уралсетьстрой</title>
-<meta name="theme-color" content="#0D2740">
+<meta name="description" content="Такой страницы на сайте нет. Вернитесь на главную или посмотрите разделы работ.">
+<meta name="theme-color" content="#16191D">
 <meta name="robots" content="noindex">
 <link rel="icon" href="img/logo.png">
 <link rel="stylesheet" href="css/fonts.css">
 <link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
+<a class="skip" href="#main">Перейти к содержанию</a>
 
 <div class="topbar">
   <div class="shell topbar__row">
     <span>ООО «УРАЛСЕТЬСТРОЙ» · ИНН 6670530808 · ОГРН 1256600035262</span>
     <span class="topbar__set">
       <a href="mailto:uralsetstroi96@mail.ru">uralsetstroi96@mail.ru</a>
+      &nbsp;·&nbsp;
       <a href="tel:+79068125444">+7 906 812-54-44</a>
     </span>
   </div>
 </div>
 
-<header class="masthead">
+<header class="masthead masthead--solid" id="masthead">
   <div class="shell masthead__row">
     <a class="brand" href="index.html">
-      <img src="img/logo.png" alt="Уралсетьстрой" width="900" height="591">
-      <span class="brand__text">
-        <span class="brand__name">УРАЛСЕТЬСТРОЙ</span>
-        <span class="brand__note">Инженерные системы зданий</span>
-      </span>
+      <img class="brand__mark brand__mark--svet" src="img/znak-latun-svet.svg" alt="Уралсетьстрой — монтаж инженерных систем" width="220" height="60">
+      <img class="brand__mark brand__mark--tem" src="img/znak-latun-tem.svg" alt="Уралсетьстрой — монтаж инженерных систем" width="220" height="60">
     </a>
+    <nav class="nav" id="nav" aria-label="Основное меню">
+      <a href="index.html">Главная</a>
+      <a href="uslugi.html">Что монтируем</a>
+      <a href="obekty.html">Объекты</a>
+      <a href="kompaniya.html">Компания</a>
+      <a href="kontakty.html">Контакты</a>
+    </nav>
     <div class="masthead__cta">
       <a class="phone" href="tel:+79068125444">+7 906 812-54-44</a>
+      <a class="btn" href="kontakty.html#zayavka">Прислать проект</a>
+      <button class="burger" id="burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="nav"><span></span></button>
     </div>
   </div>
 </header>
 
-<main>
-  <section class="pagehead">
-    <div class="shell pagehead__in">
-      <p class="crumbs">Ошибка 404</p>
-      <h1>Такой страницы здесь нет</h1>
-      <p>
-        Возможно, адрес набран с опечаткой или страницу перенесли.
-        Ниже — то, что заказчики открывают чаще всего.
-      </p>
-    </div>
-  </section>
+<main id="main">
 
-  <section class="section">
-    <div class="shell">
-      <div class="works">
-        <a class="work work--ov" href="index.html">
-          <span class="work__code">01</span>
-          <h3>На главную</h3>
-          <p>Разделы работ, опыт в цифрах, договоры и объекты.</p>
-        </a>
-        <a class="work work--vk" href="uslugi.html">
-          <span class="work__code">02</span>
-          <h3>Что монтируем</h3>
-          <p>Состав работ по каждому разделу и порядок выполнения.</p>
-        </a>
-        <a class="work work--itp" href="kontakty.html">
-          <span class="work__code">03</span>
-          <h3>Контакты и заявка</h3>
-          <p>Телефон, почта и форма для расчёта по вашему объекту.</p>
-        </a>
+<section class="pagehead">
+  <div class="pagehead__foto" style="background-image:url('img/geroy.jpg')" aria-hidden="true"></div>
+  <div class="shell">
+    <p class="crumbs"><a href="index.html">Главная</a> <span>/</span> <span>Страница не найдена</span></p>
+    <h1>Такой страницы нет</h1>
+    <p>
+      Возможно, адрес набран с ошибкой или страница переехала. Ниже три хода,
+      которые точно работают.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cards cards--3 reveal">
+      <div class="card">
+        <p class="card__key">Начать сначала</p>
+        <h3><a href="index.html">Главная страница</a></h3>
+        <p>Разделы работ, опыт в цифрах, договоры и объекты — всё на одной странице.</p>
+      </div>
+      <div class="card">
+        <p class="card__key">По делу</p>
+        <h3><a href="uslugi.html">Что монтируем</a></h3>
+        <p>Шесть инженерных разделов и состав работ по каждому.</p>
+      </div>
+      <div class="card">
+        <p class="card__key">Быстрее всего</p>
+        <h3><a href="tel:+79068125444">+7 906 812-54-44</a></h3>
+        <p>Позвоните — ответим в рабочее время и подскажем, что нужно для расчёта.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 </main>
 
 <footer class="foot">
   <div class="shell">
-    <div class="foot__bottom" style="border-top:none; padding-top:0;">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <span class="brand__text">
+          <span class="brand__name" style="color:#fff">УРАЛСЕТЬСТРОЙ</span>
+          <span class="brand__note">Инженерные системы зданий</span>
+        </span>
+        <p class="foot__about">
+          Подрядчик по монтажу внутренних и наружных инженерных систем
+          в жилой и коммерческой застройке Екатеринбурга и Свердловской области.
+        </p>
+      </div>
+      <div>
+        <h4>Разделы работ</h4>
+        <ul>
+          <li><a href="uslugi.html#vk">Водоснабжение и канализация</a></li>
+          <li><a href="uslugi.html#ov">Отопление и теплоснабжение</a></li>
+          <li><a href="uslugi.html#itp">Тепловые пункты</a></li>
+          <li><a href="uslugi.html#ovik">Вентиляция</a></li>
+          <li><a href="uslugi.html#em">Электромонтаж</a></li>
+          <li><a href="uslugi.html#gi">Гидроизоляция</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Компания</h4>
+        <ul>
+          <li><a href="obekty.html">Объекты и договоры</a></li>
+          <li><a href="kompaniya.html">О компании</a></li>
+          <li><a href="kontakty.html">Контакты</a></li>
+          <li><a href="kontakty.html#zayavka">Заявка на расчёт</a></li>
+          <li><a href="politika.html">Обработка данных</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Реквизиты</h4>
+        <p class="req">
+          ООО «УРАЛСЕТЬСТРОЙ»<br>
+          ИНН 6670530808<br>
+          КПП 667101001<br>
+          ОГРН 1256600035262<br>
+          620014, Екатеринбург,<br>
+          пер. Центральный рынок, 6<br>
+          <a href="tel:+79068125444">+7 906 812-54-44</a><br>
+          <a href="mailto:uralsetstroi96@mail.ru">uralsetstroi96@mail.ru</a>
+        </p>
+      </div>
+    </div>
+
+    <p class="foto-note">
+      Фотографии на сайте — иллюстративные: показано типовое современное оборудование, а не объекты компании. Снимки со свободной лицензией (Pixabay), кадр в разделе гидроизоляции — с сайта партнёра <a href="https://www.gydrozo.ru/" target="_blank" rel="noopener">«Гидрозо»</a>.
+      Снимки объектов компании поставим на их место, как только они появятся.
+    </p>
+
+    <div class="foot__bottom">
       <span>© 2026 ООО «УРАЛСЕТЬСТРОЙ». Директор А. А. Бабенко.</span>
-      <span><a href="politika.html">Обработка персональных данных</a></span>
+      <span>Сайт не является публичной офертой</span>
     </div>
   </div>
 </footer>
 
+<script src="js/site.js"></script>
 </body>
 </html>
