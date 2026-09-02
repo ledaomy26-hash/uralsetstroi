@@ -198,8 +198,18 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 /* На страницах без фотогероя шапка сразу плотная */
 .masthead--solid{ background:var(--bumaga-2); border-bottom-color:var(--liniya); }
 
+/* В шапке остался ОДИН знак, без текста рядом.
+   Правка 02.09.2026, вечер. Владелец: «зачем их два? Логотип УСС увеличь,
+   чтобы он был крупный, чтобы читаемо всё было, его только оставь».
+   Дублирование было настоящее: в самом знаке уже набрано «УРАЛСЕТЬСТРОЙ»
+   и «монтаж инженерных систем», а рядом стояли те же слова HTML-текстом.
+   Знак поднят с 38 до 56 px — подпись в нём стала читаться, — а название
+   компании теперь читает с картинки альтернативный текст ссылки.
+   В подвале связка «название + пояснение» осталась как была: там знак стоит
+   отдельно, и владелец просил ничего больше не трогать. */
 .brand{ display:flex; align-items:center; gap:.85rem; text-decoration:none; margin-right:auto; }
 .brand__mark{ height:38px; width:auto; }
+.masthead .brand__mark{ height:68px; }
 .brand__text{ display:grid; gap:.1rem; }
 .brand__name{
   font-family:var(--antikva); font-weight:600; font-size:1.32rem;
@@ -266,8 +276,10 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero{
   position:relative;
   min-height:min(100svh, 860px);
-  margin-top:-72px;            /* шапка лежит поверх кадра */
-  padding-top:72px;
+  /* шапка лежит поверх кадра; отступ равен её высоте — 68 px знак
+     плюс padding-block .85rem сверху и снизу */
+  margin-top:-96px;
+  padding-top:96px;
   display:flex; align-items:flex-end;
   color:#fff;
   overflow:hidden;
@@ -885,3 +897,45 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .btn.is-locked:hover{ opacity:.75; }
 
 .form__legal{ margin-top:1rem; }
+
+/* --- Разделы ужаты под экран --------------------------------------------
+   Правка 02.09.2026, вечер, вместе с листанием по всему сайту. Владелец:
+   «чтобы ни часть текста не потерялась; что можно уменьшить и вписать
+   в одну страницу — вписываем, а если получается слишком мелко, тогда
+   разделяем на две страницы».
+
+   Поэтому здесь ужимается только вертикаль и только на большом экране:
+   шаг между разделами, отступ под заголовком и внутренние поля карточек,
+   строк и таблиц. Кегль не трогаем — мельчить текст владелец запретил.
+   Что и после этого выше экрана (перечень шести разделов, этапы работ,
+   форма заявки, разделы услуг, список объектов), листается двумя этапами:
+   шаг листания меньше высоты окна, перекрытие 136 px, так что ни одна
+   строка не проскакивает между экранами.
+
+   Условие по высоте окна нужно, чтобы на низком ноутбучном экране
+   не ужимать и без того тесную вёрстку: там всё равно листается этапами. */
+@media (min-width:900px) and (min-height:760px){
+  :root{ --ritm: clamp(3rem, 2rem + 3vw, 5.6rem); }
+
+  .head{ margin-bottom:clamp(1.2rem, .9rem + 1.1vw, 2rem); }
+
+  .head{ gap:.85rem; }
+
+  .cards .card{ padding:1.25rem 1.4rem; }
+  .object{ padding:1rem 1.6rem; }
+  .etap{ padding:1.2rem 1.5rem; }
+  .ledger__row{ padding:1.2rem 1.4rem; }
+  .callout{ margin-top:1.1rem; padding:.95rem 1.3rem; }
+
+  .spec caption{ padding:.75rem 1.4rem; }
+  .spec th{ padding-block:.65rem; }
+  .spec td{ padding-block:.7rem; }
+  .spec--rekvizity th[scope="row"]{ padding-block:.5rem; }
+  .spec--rekvizity td{ padding-block:.5rem; }
+  /* пять шагов встают в один ряд: так раздел помещается в экран целиком,
+     а не режется на два — владелец просил вписывать, что вписывается */
+  .etapy{ gap:1rem; grid-template-columns:repeat(5, minmax(0,1fr)); }
+  .etap{ padding:1.15rem 1.2rem; }
+  .tablenote{ margin-top:.9rem; }
+  .cutaway__figure{ padding-block:1.1rem; }
+}

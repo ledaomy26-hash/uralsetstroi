@@ -45,71 +45,152 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  /* --- Листание по экранам -----------------------------------------------
-     Владелец: «первая страница умещается сразу; крутнул колёсиком —
-     спустился на вторую, и видно, как выставляются цифры; ещё раз —
-     на третью».
+  var calmMotion = window.matchMedia &&
+                   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-     Штатный scroll-snap это не даёт: при mandatory щелчок колеса в 120 px
+  /* --- Листание этапами: по всему сайту ----------------------------------
+     Сначала (01.09.2026) листались только первые экраны главной: владелец
+     просил «крутнул колёсиком — спустился на вторую, и видно, как
+     выставляются цифры». 02.09.2026 он попросил то же самое на всех
+     страницах: «а мы так по всему сайту можем сделать? есть места, которые
+     не умещаются на одну страницу, но ничего страшного, главное, чтобы оно
+     листалось этапами».
+
+     Штатный scroll-snap так не умеет: при mandatory щелчок колеса в 120 px
      не перекрывает высоту экрана, и браузер возвращает страницу на место
-     (измерено: scrollY 33 при следующем экране на 911). Поэтому переход
-     делает скрипт.
+     (измерено: scrollY 33 при следующем экране на 911). Поэтому остановки
+     считает скрипт.
 
-     Границы, за которые он не выходит:
+     Как считаются остановки:
+       · начало каждого раздела страницы плюс подвал;
+       · раздел выше окна режется на этапы по высоте окна с нахлёстом,
+         иначе его середина стала бы недостижимой — а разделов выше окна
+         на сайте много (услуги, объекты, форма);
+       · у полноэкранных разделов (.ekran) высота шапки не вычитается:
+         они рассчитаны ровно на экран. У обычных — вычитается, иначе
+         прилипшая шапка накрыла бы заголовок.
+
+     Границы, за которые листание не выходит:
        · только мышь на широком экране — на телефоне и тачпаде с инерцией
          перехват мешает, там прокрутка остаётся обычной;
-       · только в зоне первых экранов, ниже — руки прочь;
-       · при системном «уменьшить движение» не работает вовсе;
+       · мелкие щелчки тачпада (меньше 12 px) не трогаем вовсе;
+       · внутри прокручиваемого поля (текст заявки, таблица) — обычная
+         прокрутка;
+       · при системном «уменьшить движение» не работает;
        · пока идёт переход, следующие щелчки не копятся. */
-  var ekrany = Array.prototype.slice.call(document.querySelectorAll('.ekran, #raboty'));
   var topbar = document.querySelector('.topbar');
 
-  if (ekrany.length > 1) {
-    // высота верхней строки реквизитов: первый экран считается вместе с ней,
-    // иначе страница на неё же выше окна — «умещается сразу» не работает
-    var meritTopbar = function () {
-      var h = topbar ? Math.round(topbar.getBoundingClientRect().height) : 0;
-      document.documentElement.style.setProperty('--topbar-h', h + 'px');
-    };
-    meritTopbar();
-    window.addEventListener('resize', meritTopbar);
+  var meritTopbar = function () {
+    var h = topbar ? Math.round(topbar.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  };
+  meritTopbar();
+  window.addEventListener('resize', meritTopbar);
 
-    var mysh = window.matchMedia &&
-               window.matchMedia('(min-width:900px) and (pointer:fine)').matches;
+  var myshNaShirokom = window.matchMedia &&
+                       window.matchMedia('(min-width:900px) and (pointer:fine)').matches;
 
-    if (mysh && !calmMotion) {
-      var zanyato = false;
+  if (myshNaShirokom && !calmMotion) {
+    var ostanovki = [];
 
-      var blizhnij = function () {
-        var y = window.scrollY;
-        var nomer = 0;
-        var raznica = Infinity;
-        for (var i = 0; i < ekrany.length; i++) {
-          var d = Math.abs(ekrany[i].offsetTop - y);
-          if (d < raznica) { raznica = d; nomer = i; }
+    var soberiOstanovki = function () {
+      var okno = window.innerHeight;
+      var shapka = masthead ? Math.round(masthead.getBoundingClientRect().height) : 0;
+      var predel = Math.max(0, document.documentElement.scrollHeight - okno);
+      var shag = Math.max(320, okno - shapka - 40);   // нахлёст, чтобы строка не терялась
+      var spisok = [0];
+
+      var razdely = document.querySelectorAll('main > section, .foot');
+      Array.prototype.forEach.call(razdely, function (s) {
+        var verh = Math.round(s.getBoundingClientRect().top + window.scrollY);
+        var nizh = verh + s.offsetHeight;
+        var vychet = s.classList.contains('ekran') ? 0 : shapka;
+        spisok.push(Math.max(0, verh - vychet));
+
+        // раздел выше окна — режем на этапы, пока не дойдём до его конца
+        var k = verh - vychet + shag;
+        while (k < nizh - okno * 0.55) { spisok.push(Math.round(k)); k += shag; }
+      });
+      spisok.push(predel);
+
+      spisok = spisok
+        .map(function (v) { return Math.min(Math.max(0, Math.round(v)), predel); })
+        .sort(function (a, b) { return a - b; })
+        .filter(function (v, i, m) { return i === 0 || v - m[i - 1] > 60; });
+
+      /* Главное требование владельца: «чтобы ни часть текста не потерялась».
+         Остановка показывает полосу от себя и на высоту окна вниз, поэтому
+         шаг длиннее окна означает пропущенную полосу — так на главной один
+         переход перепрыгивал 1157 px при окне 900, и 257 px текста никто
+         бы не увидел. Поэтому длинные промежутки делим на равные шаги
+         не длиннее экрана. Промежуток ровно в экран не трогаем: это стык
+         двух полноэкранных разделов, там ничего не теряется. */
+      var rovno = [];
+      for (var i = 0; i < spisok.length; i++) {
+        rovno.push(spisok[i]);
+        if (i + 1 < spisok.length) {
+          var razryv = spisok[i + 1] - spisok[i];
+          if (razryv > okno) {
+            var chastey = Math.ceil(razryv / Math.max(240, okno - 40));
+            for (var q = 1; q < chastey; q++) {
+              rovno.push(Math.round(spisok[i] + razryv * q / chastey));
+            }
+          }
         }
-        return nomer;
-      };
+      }
 
-      window.addEventListener('wheel', function (e) {
-        if (e.ctrlKey) return;                     // масштабирование не трогаем
-        var granica = ekrany[ekrany.length - 1].offsetTop;
-        if (window.scrollY > granica + 8) return;  // ниже зоны — обычная прокрутка
+      ostanovki = rovno.sort(function (a, b) { return a - b; });
+    };
 
-        var vniz = e.deltaY > 0;
-        var tekushchij = blizhnij();
-        var sledujushchij = tekushchij + (vniz ? 1 : -1);
+    soberiOstanovki();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(soberiOstanovki);
+    window.addEventListener('load', soberiOstanovki);
+    var schetchik = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(schetchik);
+      schetchik = setTimeout(soberiOstanovki, 200);
+    });
 
-        // с последнего экрана вниз и с первого вверх — отдаём браузеру
-        if (sledujushchij < 0 || sledujushchij >= ekrany.length) return;
+    // поле, внутри которого есть что прокручивать, забирает колесо себе
+    var vnutriProkrutki = function (el) {
+      while (el && el !== document.body && el.nodeType === 1) {
+        var st = window.getComputedStyle(el);
+        if (/(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 4) return true;
+        el = el.parentElement;
+      }
+      return false;
+    };
 
-        e.preventDefault();
-        if (zanyato) return;
-        zanyato = true;
-        window.scrollTo({ top: ekrany[sledujushchij].offsetTop, behavior: 'smooth' });
-        setTimeout(function () { zanyato = false; }, 720);
-      }, { passive: false });
-    }
+    var zanyato = false;
+
+    window.addEventListener('wheel', function (e) {
+      if (e.ctrlKey) return;                       // масштабирование не трогаем
+      if (Math.abs(e.deltaY) < 12) return;         // мелкая крошка тачпада
+      if (vnutriProkrutki(e.target)) return;
+      if (ostanovki.length < 2) return;
+
+      var y = window.scrollY;
+      var vniz = e.deltaY > 0;
+      var cel = null;
+
+      if (vniz) {
+        for (var i = 0; i < ostanovki.length; i++) {
+          if (ostanovki[i] > y + 8) { cel = ostanovki[i]; break; }
+        }
+      } else {
+        for (var j = ostanovki.length - 1; j >= 0; j--) {
+          if (ostanovki[j] < y - 8) { cel = ostanovki[j]; break; }
+        }
+      }
+
+      if (cel === null) return;                    // край страницы — отдаём браузеру
+
+      e.preventDefault();
+      if (zanyato) return;
+      zanyato = true;
+      window.scrollTo({ top: cel, behavior: 'smooth' });
+      setTimeout(function () { zanyato = false; }, 620);
+    }, { passive: false });
   }
 
   /* --- Появление блоков при прокрутке ------------------------------------ */
@@ -129,8 +210,6 @@
       revealables.forEach(function (el) { io.observe(el); });
     }
   }
-
-  var calmMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* --- Чертёж прорисовывается при загрузке ------------------------------- */
   var strokes = document.querySelectorAll('.cutaway .draw');
