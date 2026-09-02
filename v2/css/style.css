@@ -1220,6 +1220,15 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   .check{ padding-block:.42rem; }
   .contactlist a{ padding-block:min(.7rem, 1.1vh); }
   .request__aside .lede{ font-size:min(1rem, 2vh); }
+
+  /* Сведения о компании: восемь строк по 57 px плюс заголовок раздела
+     давали 656 при рабочей полосе 608, и скрипт разводил заголовок
+     и таблицу по разным экранам. Владелец 02.09.2026: «сведения должны
+     быть вместе с надписью „Сведения о компании“ на одной странице».
+     Ужимаем строки — кегль остаётся прежним. */
+  .spec caption{ padding-block:min(.55rem, .95vh); }
+  .spec th, .spec td{ padding-block:min(.5rem, .8vh); }
+  .spec--rekvizity th[scope="row"], .spec--rekvizity td{ padding-block:min(.42rem, .75vh); }
 }
 
 /* Совсем низкое окно (640 и ниже): рабочая полоса 528 px, а заявке нужно
