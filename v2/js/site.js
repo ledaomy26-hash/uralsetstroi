@@ -285,7 +285,9 @@
     var pereyti = function (cel) {
       var start = window.scrollY;
       var put = cel - start;
-      var dlit = Math.max(520, Math.min(820, 380 + Math.abs(put) * 0.35));
+      /* Быстро, но плавно. Первая версия тянулась до 0,82 с — владелец:
+         «лиснул колесиком и слишком долго жду». Теперь 0,3–0,42 с. */
+      var dlit = Math.max(300, Math.min(420, 240 + Math.abs(put) * 0.14));
       var t0 = null;
 
       var shag = function (now) {

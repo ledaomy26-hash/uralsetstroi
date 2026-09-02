@@ -216,9 +216,9 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    отдельно, и владелец просил ничего больше не трогать. */
 .brand{ display:flex; align-items:center; gap:.85rem; text-decoration:none; margin-right:auto; }
 .brand__mark{ height:38px; width:auto; }
-.masthead .brand__mark{ height:78px; }
+.masthead .brand__mark{ height:84px; }
 /* На окне поуже знак меньше: иначе он подпирает меню. */
-@media (max-width:1240px){ .masthead .brand__mark{ height:60px; } }
+@media (max-width:1240px){ .masthead .brand__mark{ height:64px; } }
 .brand__text{ display:grid; gap:.1rem; }
 .brand__name{
   font-family:var(--antikva); font-weight:600; font-size:1.32rem;
@@ -285,10 +285,10 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero{
   position:relative;
   min-height:min(100svh, 860px);
-  /* шапка лежит поверх кадра; отступ равен её высоте — 78 px знак
+  /* шапка лежит поверх кадра; отступ равен её высоте — 84 px знак
      плюс padding-block .85rem сверху и снизу */
-  margin-top:-106px;
-  padding-top:106px;
+  margin-top:-112px;
+  padding-top:112px;
   display:flex; align-items:flex-end;
   color:#fff;
   overflow:hidden;
@@ -967,16 +967,24 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    раскладка: объект и разделы встали в один ряд, согласие — рядом
    с кнопками. Ниже 1240 px раскладка прежняя, в один столбец. */
 @media (min-width:1240px){
-  .form{ grid-template-columns:1fr 1fr; align-items:start; gap:1rem 1.4rem; }
-  .form__legend, .form__hint, .form .field__row,
-  .form > .field:nth-of-type(3) ~ .field:last-of-type,
-  .form__legal{ grid-column:1 / -1; }
-  /* объект — слева, разделы — справа */
-  .form > .field:nth-of-type(3){ grid-column:1; }
-  .form > .field:nth-of-type(4){ grid-column:2; }
-  /* «что нужно посчитать» — во всю ширину, ниже */
-  .form > .field:nth-of-type(5){ grid-column:1 / -1; }
-  .form textarea{ min-height:84px; }
+  /* Три колонки, а не две: с двумя раздел заявки всё равно не помещался
+     в экран и рвался надвое. Ряды полей сократились с четырёх до двух. */
+  .form{ grid-template-columns:repeat(3, 1fr); align-items:start; gap:1rem 1.2rem; }
+  .form__legend, .form__hint, .form__legal{ grid-column:1 / -1; }
+  /* пары «имя+организация» и «телефон+почта» разбираются на отдельные поля */
+  .form .field__row{ display:contents; }
+  .form > .field:nth-of-type(3){ grid-column:3; }   /* объект */
+  .form > .field:nth-of-type(4){ grid-column:1 / 3; } /* разделы */
+  .form > .field:nth-of-type(5){ grid-column:1 / -1; } /* что посчитать */
+  .form textarea{ min-height:64px; }
+  /* Подсказку под заголовком на широком экране убираем: те же слова есть
+     в подписях полей, а раздел должен уместиться в экран целиком. */
+  .form__hint{ display:none; }
+  /* Три кнопки в один ряд — экономит целую строку. */
+  .form__split{ grid-template-columns:repeat(3, 1fr); }
+  .form__send .btn--wide{ display:none; }
+  .form__split .btn--copy{ display:inline-flex; }
+  .form__legal{ font-size:.8rem; line-height:1.45; }
   /* Согласие и кнопки — во всю ширину: в узкой колонке текст согласия
      ломался на три слова в строку и читался как лапша. */
   .soglasie{ grid-column:1 / -1; margin-top:.2rem; }
@@ -1001,8 +1009,6 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    Условие по высоте окна нужно, чтобы на низком ноутбучном экране
    не ужимать и без того тесную вёрстку: там всё равно листается этапами. */
 @media (min-width:900px) and (min-height:760px){
-  :root{ --ritm: clamp(3rem, 2rem + 3vw, 5.6rem); }
-
   .head{ margin-bottom:clamp(1.2rem, .9rem + 1.1vw, 2rem); }
 
   .head{ gap:.85rem; }
@@ -1023,8 +1029,128 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
      repeat(5) ставить нельзя: на главной шагов шесть, и шестой уезжал
      одиноким на отдельный экран — выглядело поломкой. */
   .etapy{ gap:1rem; grid-template-columns:repeat(3, minmax(0,1fr)); }
-  .etapy:has(> :nth-child(5):last-child){ grid-template-columns:repeat(5, minmax(0,1fr)); }
   .etap{ padding:1.15rem 1.2rem; }
   .tablenote{ margin-top:.9rem; }
   .cutaway__figure{ padding-block:1.1rem; }
+}
+
+/* --- Разделы считаются по ВЫСОТЕ окна ------------------------------------
+   Правка 02.09.2026, поздний вечер. Владелец прошёл главную своими глазами
+   и назвал поимённо разделы, которые «немного переносятся»: разрез объекта,
+   договоры 2026, что получил заказчик, зачем один подрядчик, заявка.
+   Причина у всех одна: размеры были привязаны только к ширине окна, а его
+   окно ниже моего. Поэтому здесь все вертикальные величины ограничены ещё
+   и долей высоты окна — min(обычный размер, N vh). На высоком экране всё
+   как было, на низком раздел ужимается сам и влезает целиком. */
+@media (min-width:900px){
+  :root{ --ritm: min(clamp(3rem, 2rem + 3vw, 5.6rem), 6.4vh); }
+  h2{ font-size:min(var(--sh-3), 6.6vh); }
+  .lede{ font-size:min(var(--sh-1), 2.7vh); }
+  .head{ margin-bottom:min(clamp(1.2rem,.9rem + 1.1vw,2rem), 2.8vh); gap:min(.85rem, 1.2vh); }
+
+  /* карточки разделов: фотография не выше пятой части экрана */
+  .work__foto{ max-height:24vh; }
+  .work__body{ padding:min(1.3rem, 2.2vh) 1.4rem min(1.5rem, 2.4vh); }
+  .work__more{ padding-bottom:min(1.3rem, 2vh); }
+
+  /* разрез объекта */
+  .cutaway__figure{ padding-block:min(1.1rem, 1.6vh); }
+  .cutaway svg{ max-height:42vh; }
+
+  /* таблицы, объекты, доводы */
+  .spec td{ padding-block:min(.7rem, .85vh); }
+  .spec th{ padding-block:min(.65rem, 1vh); }
+  .spec caption{ padding-block:min(.75rem, 1.2vh); }
+  .object{ padding-block:min(1rem, 1.15vh); }
+  .reason{ padding-top:min(1.2rem, 1.5vh); }
+  .reasons{ gap:min(2.2rem, 2.4vh) 2.2rem; }
+
+  /* заявка: самая плотная часть главной */
+  .form{ padding:min(2.4rem, 2.6vh) clamp(1.4rem,1rem + 2vw,2.4rem); gap:min(1rem, 1.2vh) 1.4rem; }
+  .form__legend{ font-size:min(1.7rem, 3.4vh); }
+  .form__hint{ font-size:min(.92rem, 1.9vh); }
+  .form__legal{ font-size:min(.84rem, 1.7vh); margin-top:min(1rem, 1.2vh); }
+  .field input, .field textarea{ padding-block:min(.8rem, .9vh); }
+  .form textarea{ min-height:min(84px, 7.5vh); }
+  .soglasie{ padding-block:min(.95rem, 1.2vh); margin-top:min(1.2rem,1.2vh); }
+  .form__send{ gap:min(.7rem, 1vh); }
+  .masthead .btn, .form__send .btn{ padding-block:min(.95rem, 1.15vh); }
+  .contactlist a{ padding-block:min(.9rem, 1.4vh); }
+  .contactlist{ gap:min(.7rem, 1vh); margin-top:min(2rem, 2.6vh); }
+  /* Левая колонка заявки держала высоту всего раздела: заголовок в три
+     строки плюс абзац в четыре. На широком экране заголовок здесь ступенью
+     ниже, абзац компактнее — раздел встаёт в экран целиком. */
+  #zayavka{ padding-block:min(var(--ritm), 5vh); }
+  .request__aside h2{ font-size:min(var(--sh-2), 5vh); }
+  .request__aside .lede{ font-size:min(1.05rem, 2.1vh); line-height:1.5; }
+  /* На странице контактов в левой колонке ещё адрес и реквизиты —
+     она длиннее, чем на главной, и держала высоту раздела. */
+  .request__aside h3{ font-size:min(1.1rem, 2.3vh); }
+  .request__aside .req{ font-size:min(.78rem, 1.6vh); line-height:1.55; }
+  .request__aside > div[style]{ margin-top:min(2rem, 2.2vh) !important; }
+
+  /* карточки «чем занимаемся» и список объектов */
+  .cards .card{ padding-block:min(1.25rem, 1.7vh); gap:min(.6rem, .9vh); }
+  .objects .object{ gap:min(1.6rem, 1.2vh) 1.6rem; }
+  .object__result{ padding-left:.8rem; }
+  .object__work, .object__result{ font-size:min(.95rem, 1.9vh); }
+  .object__name strong{ font-size:min(1rem, 2vh); }
+  .cards .card h3{ font-size:min(var(--sh-1), 2.4vh); }
+  .cards .card p{ font-size:min(.96rem, 1.9vh); }
+  .card__key{ font-size:min(.7rem, 1.4vh); }
+  .contactlist__val{ font-size:min(.98rem, 2vh); }
+  .contactlist a{ gap:.7rem; padding-block:min(.9rem, 1.1vh); }
+  /* Заголовочные блоки разделов: на невысоком окне абзац под заголовком
+     съедал треть экрана. */
+  .head .lede{ font-size:min(var(--sh-1), 2.3vh); line-height:1.5; }
+  .callout{ margin-top:min(1.1rem, 1.4vh); padding-block:min(.95rem, 1.2vh); }
+  .callout p{ font-size:min(.95rem, 1.9vh); }
+  .object{ padding-block:min(1rem, 1vh); }
+  .request__aside h2{ font-size:min(var(--sh-2), 4.4vh); }
+  .request__aside .lede{ font-size:min(1.05rem, 1.95vh); }
+  .request__aside .req{ font-size:min(.78rem, 1.35vh); }
+  .request__aside h3{ font-size:min(1.1rem, 2vh); }
+  .object{ padding-block:min(1rem, .85vh); }
+  .objects .object{ gap:min(1.6rem, 1vh) 1.6rem; }
+  .cards .card{ padding-block:min(1.25rem, 1.4vh); gap:min(.6rem, .7vh); }
+  .cards .card h3{ font-size:min(var(--sh-1), 2.2vh); }
+  .head{ margin-bottom:min(clamp(1.2rem,.9rem + 1.1vw,2rem), 2.2vh); }
+  /* Шаги работы владелец просил показывать по три: «заголовок и три
+     вкладочки на одной странице, оставшиеся три на другой». Поэтому здесь
+     карточки НЕ ужимаем — раздел намеренно выше экрана, и листание кладёт
+     его ровно двумя рядами. */
+  .etapy{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:1.8rem; }
+  .etap{ padding:2.6rem 1.9rem; gap:.8rem; }
+  .etap p{ font-size:1.02rem; }
+  .etap h3{ font-size:1.25rem; }
+  #etapy .head{ margin-bottom:2rem; }
+
+  /* Знак в шапке стал крупным, и меню начало ломаться на две строки.
+     Пункты и телефон не переносим, промежутки ужимаем, а на окне уже
+     1400 px телефон из шапки убираем — он есть строкой выше и в кнопке. */
+  .masthead__row{ gap:1rem; }
+  .nav{ gap:1.15rem; }
+  .nav a{ font-size:.92rem; white-space:nowrap; }
+  .masthead .phone{ white-space:nowrap; font-size:.95rem; }
+  .masthead .btn{ white-space:nowrap; }
+
+  /* Три раздела, которые упирались последними: список объектов,
+     карточки «чем занимаемся» и заявка на странице контактов. */
+  #vypolneno h2{ font-size:min(var(--sh-3), 5.4vh); }
+  #vypolneno .head{ margin-bottom:min(1.4rem, 1.8vh); }
+  #vypolneno .callout{ margin-top:min(1rem, 1.2vh); }
+  .cards{ gap:1px; }
+  #zayavka .contactlist{ margin-top:min(1.6rem, 1.6vh); gap:min(.6rem, .7vh); }
+  #zayavka .contactlist a{ padding-block:min(.9rem, .95vh); }
+  #zayavka .request__aside .lede{ line-height:1.45; }
+  #zayavka .request__aside h2{ font-size:min(var(--sh-2), 4vh); }
+  #zayavka .request__aside > div[style]{ margin-top:min(1.4rem, 1.6vh) !important; }
+  #zayavka .request__aside h3 + p{ font-size:min(.95rem, 1.8vh); }
+  #vypolneno .lede{ font-size:min(1.05rem, 2vh); }
+  #vypolneno .object{ padding-block:min(1rem, .55vh); }
+  .cards .card{ padding-block:min(1.25rem, 1.1vh); }
+}
+
+@media (max-width:1400px){
+  .masthead .phone{ display:none; }
 }

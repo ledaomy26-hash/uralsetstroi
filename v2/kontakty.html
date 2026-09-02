@@ -168,8 +168,10 @@
         <div class="form__split">
           <button class="btn" type="button" data-send="mail">Отправить почтой</button>
           <button class="btn btn--ghost" type="button" data-send="max">Отправить в MAX</button>
+          <!-- третья кнопка в том же ряду: на широком экране ряд
+               трёхколоночный, на узком колонки схлопываются в столбик -->
+          <button class="btn btn--ghost btn--copy" type="button" data-send="copy">Скопировать заявку</button>
         </div>
-        <button class="btn btn--ghost btn--wide" type="button" data-send="copy">Скопировать текст заявки</button>
         <p class="form__status" id="formStatus" role="status"></p>
       </div>
       <p class="form__legal">
