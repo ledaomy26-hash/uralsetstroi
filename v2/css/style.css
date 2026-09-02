@@ -287,9 +287,15 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 }
 .hero__foto{
   position:absolute; inset:0;
+  background-image:url('../img/geroy.jpg');
   background-size:cover; background-position:center;
   transform:scale(1.06);
   animation:naezd 24s ease-out forwards;
+}
+/* На большом экране — кадр на 3200 px (493 КБ). Мелкий вариант оставлен
+   телефонам: гнать в них четыре мегапикселя ради экрана в 390 px незачем. */
+@media (min-width:1200px){
+  .hero__foto{ background-image:url('../img/geroy-2x.jpg'); }
 }
 /* Медленный наезд вместо видео: у ФОДД на первом экране ролик, но
    ролик — это мегабайты и звук, а движение читается почти так же. */
@@ -932,9 +938,12 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   .spec td{ padding-block:.7rem; }
   .spec--rekvizity th[scope="row"]{ padding-block:.5rem; }
   .spec--rekvizity td{ padding-block:.5rem; }
-  /* пять шагов встают в один ряд: так раздел помещается в экран целиком,
-     а не режется на два — владелец просил вписывать, что вписывается */
-  .etapy{ gap:1rem; grid-template-columns:repeat(5, minmax(0,1fr)); }
+  /* Шаги работы: три в ряд по умолчанию, а если шагов ровно пять —
+     все пять в один ряд, и раздел помещается в экран целиком. Жёсткий
+     repeat(5) ставить нельзя: на главной шагов шесть, и шестой уезжал
+     одиноким на отдельный экран — выглядело поломкой. */
+  .etapy{ gap:1rem; grid-template-columns:repeat(3, minmax(0,1fr)); }
+  .etapy:has(> :nth-child(5):last-child){ grid-template-columns:repeat(5, minmax(0,1fr)); }
   .etap{ padding:1.15rem 1.2rem; }
   .tablenote{ margin-top:.9rem; }
   .cutaway__figure{ padding-block:1.1rem; }

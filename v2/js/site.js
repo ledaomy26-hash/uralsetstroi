@@ -63,9 +63,12 @@
 
      Как считаются остановки:
        · начало каждого раздела страницы плюс подвал;
-       · раздел выше окна режется на этапы по высоте окна с нахлёстом,
-         иначе его середина стала бы недостижимой — а разделов выше окна
-         на сайте много (услуги, объекты, форма);
+       · раздел выше окна режется НЕ ровным шагом, а по границам блоков:
+         следующая остановка встаёт на верх первой карточки (строки,
+         объекта), которая целиком не поместилась. Владелец 02.09.2026:
+         «подними выше — тогда и текст влезет, и три окошка влезут,
+         а другое на вторую перенесётся… чтобы выглядело аккуратно».
+         Ровный шаг резал ряд карточек пополам, и это выглядело поломкой;
        · у полноэкранных разделов (.ekran) высота шапки не вычитается:
          они рассчитаны ровно на экран. У обычных — вычитается, иначе
          прилипшая шапка накрыла бы заголовок.
@@ -100,23 +103,90 @@
       var shag = Math.max(320, okno - shapka - 40);   // нахлёст, чтобы строка не терялась
       var spisok = [0];
 
+      /* Блоки раздела: карточки, строки таблицы, объекты, этапы. Крупный
+         узел раскрываем на детей, пока он сам выше экрана, — так до
+         отдельной карточки доходим, а мелочь вроде подписи не дробим. */
+      var soberiBloki = function (koren, rabochee) {
+        var bloki = [];
+        var obhod = function (el, glubina) {
+          Array.prototype.forEach.call(el.children, function (d) {
+            var r = d.getBoundingClientRect();
+            if (r.height < 8) return;
+            if (r.height > rabochee * 0.82 && d.children.length && glubina < 4) {
+              obhod(d, glubina + 1);
+            } else {
+              bloki.push({
+                verh: Math.round(r.top + window.scrollY),
+                niz: Math.round(r.bottom + window.scrollY)
+              });
+            }
+          });
+        };
+        obhod(koren, 0);
+        return bloki.sort(function (a, b) { return a.verh - b.verh; });
+      };
+
       var razdely = document.querySelectorAll('main > section, .foot');
       Array.prototype.forEach.call(razdely, function (s) {
         var verh = Math.round(s.getBoundingClientRect().top + window.scrollY);
         var nizh = verh + s.offsetHeight;
         var vychet = s.classList.contains('ekran') ? 0 : shapka;
-        spisok.push(Math.max(0, verh - vychet));
+        var stop = Math.max(0, verh - vychet);
+        spisok.push(stop);
 
-        // раздел выше окна — режем на этапы, пока не дойдём до его конца
-        var k = verh - vychet + shag;
-        while (k < nizh - okno * 0.55) { spisok.push(Math.round(k)); k += shag; }
+        if (nizh - verh <= okno - vychet) return;      // раздел влезает целиком
+
+        var rabochee = okno - shapka;
+        var bloki = soberiBloki(s, rabochee);
+        var strazh = 0;
+
+        /* Первый экран раздела: если ряд карточек не влезает на два-три
+           десятка пикселей, начинаем чуть ниже — съедаем часть верхнего
+           отступа секции, и ряд встаёт целиком. Владелец: «подними выше,
+           и тогда и текст влезет, и три окошка влезут». Больше, чем
+           отступ, не забираем: заголовок должен остаться на экране. */
+        if (bloki.length) {
+          var pervyjVypal = null;
+          for (var n = 0; n < bloki.length; n++) {
+            if (bloki[n].niz > stop + okno) { pervyjVypal = bloki[n]; break; }
+          }
+          if (pervyjVypal) {
+            var nehvatka = pervyjVypal.niz - (stop + okno);
+            var vozduh = bloki[0].verh - stop - shapka;   // отступ секции сверху
+            if (nehvatka > 0 && nehvatka <= vozduh - 20) {
+              stop = Math.round(stop + nehvatka + 10);
+              spisok[spisok.length - 1] = stop;
+            }
+          }
+        }
+
+        while (stop < nizh - okno * 0.5 && strazh++ < 24) {
+          var granica = stop + okno;                   // низ видимой полосы
+          var vypal = null;
+          for (var b = 0; b < bloki.length; b++) {
+            if (bloki[b].verh >= stop - 2 && bloki[b].niz > granica) { vypal = bloki[b]; break; }
+          }
+          if (!vypal) break;                           // хвост раздела виден целиком
+
+          // ставим выпавший блок сразу под шапку
+          var novyj = vypal.verh - shapka - 14;
+          // блок сам выше экрана (длинная таблица, форма) — обычный шаг
+          if (novyj <= stop + 60) novyj = stop + shag;
+          stop = Math.round(novyj);
+          spisok.push(stop);
+        }
       });
       spisok.push(predel);
 
+      /* Остановки ближе 140 px друг к другу сливаем: иначе в хвосте страницы
+         получались два-три щелчка на 20 px, и человек думал, что листание
+         сломалось. Последней всегда остаётся низ страницы. */
       spisok = spisok
         .map(function (v) { return Math.min(Math.max(0, Math.round(v)), predel); })
         .sort(function (a, b) { return a - b; })
-        .filter(function (v, i, m) { return i === 0 || v - m[i - 1] > 60; });
+        .filter(function (v, i, m) { return i === 0 || v - m[i - 1] > 140; });
+      if (spisok[spisok.length - 1] < predel - 140) spisok.push(predel);
+      else spisok[spisok.length - 1] = predel;
 
       /* Главное требование владельца: «чтобы ни часть текста не потерялась».
          Остановка показывает полосу от себя и на высоту окна вниз, поэтому
