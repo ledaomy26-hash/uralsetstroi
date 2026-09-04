@@ -215,14 +215,45 @@
      работников, для их размещения нужно письменное согласие. -->
 <section class="section" id="dokumenty">
   <div class="shell">
-    <div class="head reveal">
-      <p class="eyebrow">Допуски и документы</p>
-      <h2>Документы и квалификация</h2>
-      <p class="lede">
-        Всё, что служба безопасности застройщика запрашивает первым письмом:
-        членство в СРО с правом работ, уровень ответственности, страхование,
-        квалификация инженеров и карточка предприятия.
-      </p>
+    <!-- Заголовок слева, три документа справа — владелец 04.09.2026: «вот
+         справа у тебя есть место как раз-таки сделать три таких вставочки,
+         нажимаешь на них — документ открывается». До этого список стоял
+         отдельной строкой под карточками и уезжал на свой почти пустой лист:
+         сверху тёмная шапка сайта, посередине три плитки, снизу белое поле. -->
+    <div class="dokshapka reveal">
+      <div class="head">
+        <p class="eyebrow">Допуски и документы</p>
+        <h2>Документы и квалификация</h2>
+        <p class="lede">
+          Всё, что служба безопасности застройщика запрашивает первым письмом:
+          членство в СРО с правом работ, уровень ответственности, страхование,
+          квалификация инженеров и карточка предприятия.
+        </p>
+      </div>
+
+      <div class="doclist">
+        <a class="doclist__item" href="dokumenty/kartochka-predpriyatiya-uralsetstroi.pdf" download>
+          <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a1 1 0 00-1 1v16a1 1 0 001 1h10a1 1 0 001-1V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>
+          <span class="doclist__body">
+            <span class="doclist__key">Карточка предприятия</span>
+            <span class="doclist__val">Реквизиты и банковские данные одним листом · PDF, 520 КБ</span>
+          </span>
+        </a>
+        <a class="doclist__item" href="dokumenty/vypiska-sro.pdf" download>
+          <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg></span>
+          <span class="doclist__body">
+            <span class="doclist__key">Выписка из реестра СРО</span>
+            <span class="doclist__val">Право работ, уровень ответственности, страхование · PDF, 1,5 МБ</span>
+          </span>
+        </a>
+        <a class="doclist__item" href="dokumenty/vypiska-egrul.pdf" download>
+          <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+          <span class="doclist__body">
+            <span class="doclist__key">Выписка из ЕГРЮЛ</span>
+            <span class="doclist__val">Актуальна на 4 сентября 2026 года · PDF, 165 КБ</span>
+          </span>
+        </a>
+      </div>
     </div>
 
     <div class="cards cards--3 reveal">
@@ -280,29 +311,6 @@
       </div>
     </div>
 
-    <div class="doclist reveal">
-      <a class="doclist__item" href="dokumenty/kartochka-predpriyatiya-uralsetstroi.pdf" download>
-        <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a1 1 0 00-1 1v16a1 1 0 001 1h10a1 1 0 001-1V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>
-        <span class="doclist__body">
-          <span class="doclist__key">Карточка предприятия</span>
-          <span class="doclist__val">Реквизиты и банковские данные одним листом · PDF, 520 КБ</span>
-        </span>
-      </a>
-      <a class="doclist__item" href="dokumenty/vypiska-sro.pdf" download>
-        <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg></span>
-        <span class="doclist__body">
-          <span class="doclist__key">Выписка из реестра СРО</span>
-          <span class="doclist__val">Право работ, уровень ответственности, страхование · PDF, 1,5 МБ</span>
-        </span>
-      </a>
-      <a class="doclist__item" href="dokumenty/vypiska-egrul.pdf" download>
-        <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
-        <span class="doclist__body">
-          <span class="doclist__key">Выписка из ЕГРЮЛ</span>
-          <span class="doclist__val">Актуальна на 4 сентября 2026 года · PDF, 165 КБ</span>
-        </span>
-      </a>
-    </div>
   </div>
 </section>
 
@@ -342,20 +350,12 @@
   </div>
 </section>
 
-<section class="section section--tight">
-  <div class="shell">
-    <div class="cta-strip reveal">
-      <div>
-        <h3>Нужен подрядчик на инженерные разделы?</h3>
-        <p>Пришлите проект или ведомость объёмов работ — подготовим предложение и приедем на площадку.</p>
-      </div>
-      <div class="cta-strip__act">
-        <a class="btn" href="kontakty.html#zayavka">Прислать проект</a>
-        <a class="btn btn--ghost" href="tel:+79068125444">+7 906 812-54-44</a>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- Полоса «Прислать проект» отсюда убрана 04.09.2026. Владелец:
+     «зачем ты это на каждой вкладке сделал? Если у тебя и так вверху
+     каждый раз показан номер телефона и прислать проект — это вообще
+     лишнее». Блок повторял шапку, а при листании забирал себе целый
+     полупустой лист. Телефон, почта и кнопка заявки остаются в шапке
+     и в верхней строке на всех страницах. -->
 
 </main>
 

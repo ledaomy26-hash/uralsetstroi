@@ -30,7 +30,7 @@
   --grafit-3:    #2A3037;
   --tush:        #15181C;
   --tush-2:      #545C66;
-  --tush-3:      #838C96;
+  --tush-3:      #5F6874;
   --bumaga:      #F4F5F6;
   --bumaga-2:    #FFFFFF;
   --bumaga-3:    #EAECEE;
@@ -133,7 +133,7 @@ p{ margin:0; }
 .head{ display:grid; gap:1rem; margin-bottom:clamp(2rem,1.3rem + 2.4vw,3.6rem); max-width:64ch; }
 .head--wide{ max-width:none; }
 .lede{ color:var(--tush-2); font-size:var(--sh-1); line-height:1.6; max-width:62ch; }
-.section--dark .lede{ color:#AEB6BF; }
+.section--dark .lede{ color:#C7CDD4; }
 
 .eyebrow{
   font-family:var(--mono);
@@ -181,7 +181,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 
 /* --- Верхняя строка и шапка --------------------------------------------- */
 .topbar{
-  background:var(--grafit); color:#A6AEB7;
+  background:var(--grafit); color:#C1C8CF;
   font-family:var(--mono); font-size:.72rem; letter-spacing:.04em;
 }
 .topbar__row{ display:flex; justify-content:space-between; gap:1rem; padding-block:.5rem; flex-wrap:wrap; }
@@ -226,7 +226,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 }
 .brand__note{
   font-family:var(--mono); font-size:.6rem; letter-spacing:.19em;
-  text-transform:uppercase; color:rgba(255,255,255,.65);
+  text-transform:uppercase; color:rgba(255,255,255,.9);
 }
 .is-stuck .brand__name, .masthead--solid .brand__name{ color:var(--tush); }
 .is-stuck .brand__note, .masthead--solid .brand__note{ color:var(--tush-3); }
@@ -238,7 +238,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 
 .nav{ display:flex; gap:1.5rem; }
 .nav a{
-  text-decoration:none; font-size:.95rem; color:rgba(255,255,255,.86);
+  text-decoration:none; font-size:.95rem; color:rgba(255,255,255,.92);
   padding-block:.35rem; border-bottom:1px solid transparent;
   transition:color .2s, border-color .2s;
 }
@@ -375,7 +375,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero__lede{
   margin-top:min(1.6rem, 2.4vh); max-width:56ch;
   font-size:min(var(--sh-1), 2.5vh);
-  color:rgba(255,255,255,.86); line-height:1.6;
+  color:rgba(255,255,255,.92); line-height:1.6;
 }
 .hero__actions{ display:flex; flex-wrap:wrap; gap:.8rem; margin-top:min(2.2rem, 3.2vh); }
 .hero__facts{
@@ -392,11 +392,11 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    и «млн ₽» рядом с крупным числом выглядел бы набранным вслепую. */
 .hero__fact b i{
   font-family:var(--text); font-style:normal; font-weight:400;
-  font-size:.5em; color:rgba(255,255,255,.75); letter-spacing:.01em;
+  font-size:.5em; color:rgba(255,255,255,.88); letter-spacing:.01em;
 }
 .hero__fact span{
   font-family:var(--mono); font-size:.7rem; letter-spacing:.13em;
-  text-transform:uppercase; color:rgba(255,255,255,.62);
+  text-transform:uppercase; color:rgba(255,255,255,.8);
 }
 
 /* --- Разрез объекта (перенесён из первой версии) ------------------------- */
@@ -411,7 +411,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .cutaway__cap{
   display:flex; justify-content:space-between; gap:1rem;
   font-family:var(--mono); font-size:.68rem; letter-spacing:.13em;
-  text-transform:uppercase; color:#8B939C; margin-bottom:.55rem;
+  text-transform:uppercase; color:#AAB3BD; margin-bottom:.55rem;
 }
 @keyframes draw{ to{ stroke-dashoffset:0; } }
 .cutaway .draw{ stroke-dashoffset:var(--len,0); animation:draw 1s ease forwards; }
@@ -468,7 +468,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   text-transform:uppercase; color:var(--latun-sv);
 }
 .cutaway__title{ font-family:var(--antikva); font-weight:600; font-size:1.25rem; color:#fff; }
-.cutaway__text{ font-size:.88rem; line-height:1.5; color:#AEB6BF; }
+.cutaway__text{ font-size:.88rem; line-height:1.5; color:#C7CDD4; }
 
 .razrez{ display:grid; gap:clamp(1.6rem,1rem + 3vw,3.4rem); align-items:center; }
 @media(min-width:980px){ .razrez{ grid-template-columns:.9fr 1.1fr; } }
@@ -554,9 +554,9 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   line-height:1; color:#fff; display:flex; align-items:baseline; gap:.4rem;
 }
 .ledger__val span{
-  font-family:var(--text); font-weight:400; font-size:.9rem; color:#9BA3AC; letter-spacing:.02em;
+  font-family:var(--text); font-weight:400; font-size:.9rem; color:#B4BCC5; letter-spacing:.02em;
 }
-.ledger__note{ font-size:.88rem; color:#A9B1BA; line-height:1.5; }
+.ledger__note{ font-size:.88rem; color:#C3CAD1; line-height:1.5; }
 .ledger__foot{ margin-top:1.4rem; font-family:var(--mono); font-size:.74rem; color:#7E868F; }
 
 /* --- Таблица договоров --------------------------------------------------- */
@@ -632,7 +632,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 @media(min-width:1100px){ .reasons{ grid-template-columns:repeat(3,1fr); } }
 .reason{ display:grid; gap:.55rem; align-content:start; padding-top:1.2rem; border-top:1px solid var(--liniya-t); }
 .reason__num{ font-family:var(--mono); font-size:.74rem; letter-spacing:.16em; color:var(--latun-sv); }
-.reason p{ color:#A9B1BA; font-size:.96rem; }
+.reason p{ color:#C3CAD1; font-size:.96rem; }
 .reason h3{ color:#fff; }
 
 /* --- Полоса-цитата с фотографией ----------------------------------------- */
@@ -645,7 +645,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .polosa::after{ content:""; position:absolute; inset:0; background:rgba(14,17,20,.66); }
 .polosa__inner{ position:relative; z-index:2; padding-block:clamp(3rem,2rem + 4vw,5rem); }
 .polosa h2{ max-width:20ch; }
-.polosa p{ margin-top:1.2rem; max-width:56ch; color:rgba(255,255,255,.84); font-size:var(--sh-1); }
+.polosa p{ margin-top:1.2rem; max-width:56ch; color:rgba(255,255,255,.9); font-size:var(--sh-1); }
 
 /* --- Заявка -------------------------------------------------------------- */
 .request{ display:grid; gap:clamp(1.8rem,1.2rem + 3vw,3.6rem); }
@@ -663,7 +663,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .contactlist__ic{ width:22px; height:22px; color:var(--latun-sv); flex:none; }
 .contactlist__ic svg{ width:100%; height:100%; }
 .contactlist__body{ display:grid; gap:.1rem; }
-.contactlist__key{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:#8B939C; }
+.contactlist__key{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:#AAB3BD; }
 .contactlist__val{ color:#fff; font-size:.98rem; }
 
 /* --- Свои фотографии с объектов ------------------------------------------ */
@@ -675,7 +675,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 @media(min-width:1080px){ .fotoset{ grid-template-columns:repeat(3,1fr); } }
 .fotoset__item{ margin:0; display:grid; gap:.6rem; align-content:start; }
 .fotoset__item img{
-  width:100%; aspect-ratio:3/2; object-fit:cover;
+  width:100%; aspect-ratio:4/3; object-fit:cover;
   /* align-self обязателен: в grid картинка по умолчанию растягивается
      на всю высоту ряда, и aspect-ratio ей не помеха — на первом прогоне
      кадры вытянулись в вертикальные полосы (снимок 04.09.2026). */
@@ -683,9 +683,12 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
   border-radius:var(--radius-2); border:1px solid var(--liniya);
   background:var(--bumaga-2);
 }
+/* Подпись под кадром. Была набрана мелким моношрифтом бледно-серым — владелец
+   04.09.2026: «под фотографиями у тебя текст ни хера не видно». Теперь обычный
+   шрифт сайта, крупнее и тем же тоном, что описания в карточках. */
 .fotoset__item figcaption{
-  font-family:var(--mono); font-size:.7rem; letter-spacing:.06em;
-  color:var(--tush-3); line-height:1.4;
+  font-family:var(--text); font-size:.92rem; line-height:1.4;
+  color:var(--tush-2);
 }
 
 /* --- Документы к скачиванию ---------------------------------------------- */
@@ -695,6 +698,16 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
    размер цели — 44 px. */
 .doclist{ display:grid; gap:.7rem; margin-top:clamp(1.6rem,1.2rem + 1.4vw,2.4rem); }
 @media(min-width:900px){ .doclist{ grid-template-columns:repeat(3,1fr); } }
+
+/* Шапка раздела «Документы и квалификация»: слева заголовок, справа три
+   плитки с файлами. Раньше плитки шли отдельной строкой под карточками
+   и на широком экране уезжали на свой лист. */
+.dokshapka{ display:grid; gap:clamp(1.4rem,1rem + 1.6vw,2.4rem); }
+@media(min-width:1080px){
+  .dokshapka{ grid-template-columns:1.05fr .95fr; align-items:start; }
+  .dokshapka .doclist{ grid-template-columns:1fr; margin-top:0; }
+  .dokshapka .head{ margin-bottom:0; }
+}
 .doclist__item{
   display:flex; align-items:center; gap:.9rem; text-decoration:none;
   min-height:44px; padding:1rem 1.1rem;
@@ -751,16 +764,16 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .form__legal a{ color:var(--latun); }
 
 /* --- Подвал -------------------------------------------------------------- */
-.foot{ background:var(--grafit); color:#A9B1BA; padding-block:clamp(3rem,2rem + 3vw,4.5rem) 2rem; }
+.foot{ background:var(--grafit); color:#C3CAD1; padding-block:clamp(3rem,2rem + 3vw,4.5rem) 2rem; }
 .foot__grid{ display:grid; gap:2.2rem; }
 @media(min-width:760px){ .foot__grid{ grid-template-columns:1.4fr 1fr 1fr 1.1fr; } }
 .foot__brand .brand__mark{ height:44px; }
 .foot__about{ margin-top:1rem; font-size:.92rem; line-height:1.6; max-width:36ch; }
 .foot h4{ color:#fff; margin-bottom:.9rem; font-size:.96rem; }
 .foot ul{ list-style:none; margin:0; padding:0; display:grid; gap:.45rem; }
-.foot a{ text-decoration:none; color:#A9B1BA; font-size:.93rem; }
+.foot a{ text-decoration:none; color:#C3CAD1; font-size:.93rem; }
 .foot a:hover{ color:var(--latun-sv); }
-.req{ font-family:var(--mono); font-size:.78rem; line-height:1.8; color:#98A0A9; }
+.req{ font-family:var(--mono); font-size:.78rem; line-height:1.8; color:#B4BCC5; }
 .foot__bottom{
   margin-top:2.6rem; padding-top:1.3rem; border-top:1px solid var(--liniya-t);
   display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;
@@ -783,12 +796,12 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 }
 .pagehead .shell{ position:relative; z-index:2; }
 .pagehead h1{ max-width:20ch; }
-.pagehead p{ margin-top:1.2rem; max-width:62ch; color:rgba(255,255,255,.82); font-size:var(--sh-1); }
+.pagehead p{ margin-top:1.2rem; max-width:62ch; color:rgba(255,255,255,.9); font-size:var(--sh-1); }
 .crumbs{
   font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
-  color:rgba(255,255,255,.55); margin-bottom:1.4rem;
+  color:rgba(255,255,255,.74); margin-bottom:1.4rem;
 }
-.crumbs a{ text-decoration:none; color:rgba(255,255,255,.75); }
+.crumbs a{ text-decoration:none; color:rgba(255,255,255,.88); }
 .crumbs a:hover{ color:var(--latun-sv); }
 .crumbs span{ color:rgba(255,255,255,.4); }
 
@@ -831,7 +844,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 }
 @media(min-width:900px){ .cta-strip{ grid-template-columns:1.4fr auto; } }
 .cta-strip h3{ font-family:var(--antikva); font-weight:600; font-size:var(--sh-2); line-height:1.1; }
-.cta-strip p{ margin-top:.7rem; color:#A9B1BA; max-width:56ch; }
+.cta-strip p{ margin-top:.7rem; color:#C3CAD1; max-width:56ch; }
 .cta-strip__act{ display:flex; flex-wrap:wrap; gap:.7rem; }
 .cta-strip .btn{ background:var(--latun-2); border-color:var(--latun-2); }
 .cta-strip .btn:hover{ background:var(--latun); border-color:var(--latun); }
@@ -1307,7 +1320,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .hero__tipy{
   margin-top:min(1rem, 1.6vh);
   font-family:var(--mono); font-size:min(.86rem, 1.7vh);
-  letter-spacing:.06em; color:rgba(255,255,255,.82);
+  letter-spacing:.06em; color:rgba(255,255,255,.9);
 }
 .hero__tipy i{ font-style:normal; color:var(--latun-sv); padding-inline:.15em; }
 .hero__itog{
@@ -1341,7 +1354,7 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
 .ledger__val{ color:var(--latun-sv); }
 .ledger__val span{ color:rgba(230,214,186,.72); }
 .ledger__key{ color:rgba(255,255,255,.58); }
-.ledger__note{ color:#98A0A9; font-size:.84rem; }
+.ledger__note{ color:#B4BCC5; font-size:.84rem; }
 .ekran--cifry .ledger__val{ font-size:min(clamp(3.6rem, 2.4rem + 4vw, 6rem), 12vh); }
 .ekran--cifry .ledger__note{ font-size:.86rem; }
 
@@ -1512,6 +1525,27 @@ html:not(.js) .reveal{ opacity:1; transform:none; }
     .work__foto{ height:min(230px, 12.6vh); }
     #raboty .head{ margin-bottom:min(1rem, 1.2vh); }
   }
+
+  /* Раздел документов на невысоком окне: плитки и карточки ужимаются
+     отступами, иначе раздел разъезжается на два листа (замер: не хватало
+     37 px на 1366×768 и 51 px на 1280×700). Кегль не тронут. */
+  @media (max-height:820px){
+    .dokshapka{ gap:min(1.6rem, 2.4vh); }
+    .doclist__item{ padding:min(.7rem, 1.1vh) 1.1rem; }
+    .doclist{ gap:min(.55rem, .8vh); }
+    #dokumenty .card{ padding:min(1.1rem, 1.7vh) 1.3rem; gap:min(.4rem, .6vh); }
+    #dokumenty .lede{ margin-top:min(.7rem, 1.1vh); }
+  }
+
+  /* Галерея своих фотографий: кадры настолько крупные, насколько позволяет
+     экран, — но так, чтобы все шесть с заголовком остались на одном листе.
+     Владелец 04.09.2026: «фотографии чуть-чуть увеличить, а то листаешь —
+     и страница как будто полупустая». Пределы посчитаны замером: при высоте
+     окна 1080 в ряд помещается кадр до 306 px, при 900 — до 214, при 768 —
+     до 175; берём с небольшим запасом. */
+  .fotoset__item img{ aspect-ratio:auto; height:min(300px, 27vh); }
+  @media (max-height:960px){ .fotoset__item img{ height:min(300px, 23vh); } }
+  @media (max-height:800px){ .fotoset__item img{ height:min(300px, 22vh); } }
 
   /* Заголовок раздела над лентой: отступы вниз, кегль на месте. */
   #raboty .head, #etapy .head{ margin-bottom:min(1.2rem, 1.6vh); }
