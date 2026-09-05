@@ -181,6 +181,36 @@
     var NEDELIMYE = 'form, .request, .cutaway, .tablewrap, .cta-strip, ' +
                     '.detail, .pagehead .shell, .polosa__inner, .cepochka';
 
+    /* Цели якорных ссылок этой страницы.
+
+       05.09.2026 заказчик прислал два видео: жмёт в подвале «Электромонтаж»
+       и попадает на «Индивидуальные тепловые пункты», «Тепловые пункты»
+       уводят непонятно куда, «Вентиляция» останавливается серединой экрана.
+       Его слова: «не совсем корректно переходят по вот этим вот ссылкам».
+
+       Причина не в разметке — id стоят верно. Шесть разделов услуг лежат
+       ОДНОЙ секцией, поэтому раскладка сажает их по два-три на экран, и
+       браузерный прыжок по якорю оставляет нужный раздел то у нижней кромки,
+       то за ней. Лечение из двух частей: раздел, на который есть якорь,
+       всегда начинает свой экран (здесь), а сам переход ведём сами и уже
+       после раскладки (ниже, `podvestiKYakoryu`). */
+    var yakornye = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll('a[href*="#"]'), function (a) {
+        var href = a.getAttribute('href') || '';
+        var id = href.slice(href.indexOf('#') + 1);
+        if (!id || id === 'main') return;
+        var el = document.getElementById(id);
+        if (el && yakornye.indexOf(el) < 0) yakornye.push(el);
+      });
+
+    var estYakor = function (el) {
+      for (var i = 0; i < yakornye.length; i++) {
+        if (el === yakornye[i] || el.contains(yakornye[i])) return true;
+      }
+      return false;
+    };
+
     /* Ряды раздела: то, что человек читает как одну строку. Узел выше
        рабочей полосы раскрываем на детей — так от ленты карточек доходим
        до отдельной карточки, а заголовочный блок не дробим. Абсолютные
@@ -218,6 +248,9 @@
         } else {
           ryady.push({ eli: [b.el], verh: b.verh, niz: b.niz });
         }
+      });
+      ryady.forEach(function (r) {
+        r.yakor = r.eli.some(estYakor);
       });
       return ryady;
     };
@@ -273,10 +306,13 @@
           var ekran = 0;
 
           while (i < ryady.length) {
-            /* Сколько рядов влезает в этот экран, считая от первого. */
+            /* Сколько рядов влезает в этот экран, считая от первого.
+               Ряд, на который ведёт якорь, в чужой экран не подсаживаем:
+               по ссылке из подвала человек должен увидеть раздел с самого
+               верха, а не найти его прижатым к нижней кромке. */
             var k = i;
             var mesto = polezno - VOZDUH * 2;
-            while (k + 1 < ryady.length &&
+            while (k + 1 < ryady.length && !ryady[k + 1].yakor &&
                    ryady[k + 1].niz - ryady[i].verh <= mesto) k++;
 
             var vysota = ryady[k].niz - ryady[i].verh;
@@ -349,9 +385,115 @@
       }
     };
 
-    razlozhit();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(razlozhit);
-    window.addEventListener('load', razlozhit);
+    /* --- Переход по якорю ------------------------------------------------
+       Браузер прыгает на якорь в момент навигации — то есть ДО того, как
+       скрипт разложит страницу по экранам, и до того, как догрузятся
+       фотографии, от которых зависит высота карточек. Каждая следующая
+       перекладка сдвигает содержимое под уже установленной прокруткой, и
+       человек оказывается на соседнем разделе. Ровно это заказчик и снял
+       на видео 04.09.2026.
+
+       Поэтому цель считаем сами и по краю экрана: раздел, у которого есть
+       якорь, начинает свой экран, значит нужная остановка — та, что стоит
+       над ним. Тогда после перехода раздел виден целиком, с воздухом под
+       шапкой, а не половиной у кромки. */
+    /* Допуск берём В ПЛЮС, а не в минус. Целый раздел (`section#zayavka`)
+       начинается ровно на границе экрана, и при вычитании допуска эта
+       граница отбрасывалась — переход уходил на экран выше, к тёмному
+       хвосту предыдущего раздела. У блока внутри раздела (`.detail#em`)
+       верх стоит ниже границы на шапку и воздух, ему допуск безразличен. */
+    var ostanovkaDlya = function (el) {
+      var v = verhDok(el);
+      for (var i = ostanovki.length - 1; i >= 0; i--) {
+        if (ostanovki[i] <= v + 4) return ostanovki[i];
+      }
+      return 0;
+    };
+
+    /* Куда человек шёл по якорю. Держим сам элемент, а не адрес: пока он
+       не тронул страницу сам, каждая перекладка обязана вернуть его на это
+       место, сколько бы снимков ни догрузилось следом. */
+    /* Прокрутка без плавности браузера. В стиле стоит
+       `html{ scroll-behavior:smooth }` — он нужен там, где листания нет
+       (телефон, тачпад): тогда якорь доезжает мягко сам. Но на наши
+       собственные переходы он ложится вторым слоем: каждый кадр анимации
+       запускает ещё одну плавную прокрутку, и вместо 0,4 с прыжок тянется
+       полторы секунды и смазывается. Поэтому здесь плавность выключаем
+       явно — свою кривую мы рисуем сами.
+
+       Именно `instant`, а не `auto`: `auto` по спецификации значит «как
+       сказано в стиле», то есть тот же самый smooth. Замер 05.09.2026:
+       с `auto` переход к заявке с главной шёл 1,5 с и на 600-й миллисекунде
+       был пройден лишь на 5 %. */
+    var prokrutit = function (y) {
+      try {
+        window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+      } catch (err) {
+        window.scrollTo(0, y);
+      }
+    };
+
+    var celYakorya = null;
+    var chelovekKrutil = false;
+    /* Номер идущего перехода. Объявлен здесь, а не рядом с `pereyti`:
+       подведение к якорю случается уже на первой раскладке, то есть
+       раньше. */
+    var perehod = 0;
+
+    var otpustit = function () {
+      chelovekKrutil = true;
+      celYakorya = null;
+    };
+
+    var podvestiKYakoryu = function (plavno) {
+      if (!celYakorya || !ostanovki.length) return;
+      var cel = ostanovkaDlya(celYakorya);
+      if (plavno) {
+        zanyato = true;
+        pereyti(cel);
+        return;
+      }
+      /* Мгновенное подведение обязано отменить идущий переход. Иначе
+         снимок, догрузившийся посреди плавного хода, перекладывает
+         страницу, мы ставим прокрутку на новое место — а следующий кадр
+         анимации возвращает её на старое, посчитанное до перекладки.
+         Именно так «Прислать проект» с главной оставалась на разделе
+         «Почему мы» (замер 05.09.2026: 663 px вместо 0). */
+      perehod++;
+      zanyato = false;
+      if (Math.abs(window.scrollY - cel) > 2) prokrutit(cel);
+    };
+
+    var vzyatIzAdresa = function () {
+      var id = (location.hash || '').slice(1);
+      celYakorya = id ? document.getElementById(id) : null;
+    };
+    vzyatIzAdresa();
+
+    /* Пока страница устаканивается (шрифты, снимки), доводим прокрутку
+       после каждой перекладки — если человек ещё не тронул её сам. */
+    var razlozhitIPodvesti = function () {
+      razlozhit();
+      if (!chelovekKrutil) podvestiKYakoryu(false);
+    };
+
+    razlozhitIPodvesti();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(razlozhitIPodvesti);
+    }
+    window.addEventListener('load', razlozhitIPodvesti);
+    window.addEventListener('hashchange', function () {
+      chelovekKrutil = false;
+      vzyatIzAdresa();
+      podvestiKYakoryu(true);
+    });
+
+    /* Тронул страницу сам — больше не ведём. Колесо ловится ниже, здесь
+       клавиши и палец: иначе доведение спорило бы с человеком. */
+    window.addEventListener('keydown', function (e) {
+      if (/^(Arrow|Page|Home|End| )/.test(e.key)) otpustit();
+    });
+    window.addEventListener('touchstart', otpustit, { passive: true });
 
     /* Фотографии разделов помечены `loading="lazy"`, и высота карточки
        меняется в тот момент, когда снимок наконец пришёл, — то есть уже
@@ -367,7 +509,7 @@
       if (im.complete) return;
       im.addEventListener('load', function () {
         clearTimeout(poZagruzke);
-        poZagruzke = setTimeout(razlozhit, 60);
+        poZagruzke = setTimeout(razlozhitIPodvesti, 60);
       });
     });
     var schetchik = null;
@@ -400,13 +542,15 @@
          «лиснул колесиком и слишком долго жду». Теперь 0,3–0,42 с. */
       var dlit = Math.max(300, Math.min(420, 240 + Math.abs(put) * 0.14));
       var t0 = null;
+      var moy = ++perehod;
 
       var shag = function (now) {
+        if (moy !== perehod) return;               // переход отменён — уходим
         if (t0 === null) t0 = now;
         var p = Math.min(1, (now - t0) / dlit);
         // ease-in-out: 0.5 - cos(pi*p)/2, но с уклоном в торможение
         var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-        window.scrollTo(0, Math.round(start + put * e));
+        prokrutit(Math.round(start + put * e));
         if (p < 1) requestAnimationFrame(shag);
         else zanyato = false;
       };
@@ -416,6 +560,7 @@
     window.addEventListener('wheel', function (e) {
       if (e.ctrlKey) return;                       // масштабирование не трогаем
       if (Math.abs(e.deltaY) < 12) return;         // мелкая крошка тачпада
+      otpustit();                                  // дальше страницу не дёргаем
       if (vnutriProkrutki(e.target)) return;
       if (ostanovki.length < 2) return;
 
@@ -440,6 +585,89 @@
       zanyato = true;
       pereyti(cel);
     }, { passive: false });
+
+    /* Ссылка на свой же раздел ведётся тем же плавным переходом, что и
+       колесо. Отдать её браузеру нельзя: он прыгает на верх элемента, а
+       верх накрыт липкой шапкой — заголовок оказывается под ней. */
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey ||
+          e.shiftKey || e.altKey) return;
+      var a = e.target;
+      while (a && a !== document.body && a.tagName !== 'A') a = a.parentElement;
+      if (!a || a.tagName !== 'A') return;
+      if (a.target && a.target !== '_self') return;
+
+      var href = a.getAttribute('href') || '';
+      var reshetka = href.indexOf('#');
+      if (reshetka < 0) return;
+      var id = href.slice(reshetka + 1);
+      if (!id) return;
+
+      /* «uslugi.html#em» со страницы услуг — это своя же страница. */
+      var chuzhaya = href.slice(0, reshetka);
+      var svoya = location.pathname.split('/').pop() || 'index.html';
+      if (chuzhaya && chuzhaya !== svoya) return;
+
+      var el = document.getElementById(id);
+      if (!el || !ostanovki.length) return;
+
+      /* Клик по ссылке — это просьба попасть в место, а не «человек листает
+         сам»: снимки догружаются и после клика, каждая догрузка
+         перекладывает страницу, и без доведения человек снова оказался бы
+         на соседнем разделе — ровно та беда, с которой всё началось. */
+      e.preventDefault();
+      chelovekKrutil = false;
+      celYakorya = el;
+      if (history.replaceState) history.replaceState(null, '', '#' + id);
+      else location.hash = id;
+      if (zanyato) return;
+      zanyato = true;
+      pereyti(ostanovkaDlya(el));
+    });
+  } else {
+    /* --- Якорь там, где листания по экранам нет ---------------------------
+       Телефон, тачпад, «уменьшить движение». Раскладки здесь нет, отступ
+       под шапку даёт `scroll-margin-top` из стиля — но остаётся вторая
+       половина беды: снимок догружается уже после прыжка и толкает
+       содержимое вниз. Замер 05.09.2026 на окне 1024×700: заявка уезжала
+       на 222 px. Поэтому просто возвращаем элемент на место, пока человек
+       не тронул страницу сам. */
+    var celTihaya = null;
+    var tronul = false;
+
+    var vzyatTihuyu = function () {
+      var id = (location.hash || '').slice(1);
+      celTihaya = id ? document.getElementById(id) : null;
+    };
+    vzyatTihuyu();
+
+    var dovesti = function () {
+      if (!celTihaya || tronul) return;
+      try {
+        celTihaya.scrollIntoView({ block: 'start', behavior: 'instant' });
+      } catch (err) {
+        celTihaya.scrollIntoView(true);
+      }
+    };
+
+    ['wheel', 'touchstart', 'keydown'].forEach(function (sob) {
+      window.addEventListener(sob, function () { tronul = true; }, { passive: true });
+    });
+    window.addEventListener('hashchange', function () {
+      tronul = false;
+      vzyatTihuyu();
+      dovesti();
+    });
+    window.addEventListener('load', dovesti);
+
+    var srok = null;
+    Array.prototype.forEach.call(document.querySelectorAll('main img'), function (im) {
+      if (im.complete) return;
+      im.addEventListener('load', function () {
+        clearTimeout(srok);
+        srok = setTimeout(dovesti, 80);
+      });
+    });
   }
 
   /* --- Появление блоков при прокрутке ------------------------------------ */

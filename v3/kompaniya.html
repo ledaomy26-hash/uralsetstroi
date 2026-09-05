@@ -231,26 +231,36 @@
         </p>
       </div>
 
+      <!-- Документ ОТКРЫВАЕТСЯ, а не скачивается. Владелец 05.09.2026:
+           «нажимаешь — открывается, а если нужно скачать, в PDF там будет
+           скачать файл». Раньше стоял атрибут `download`, и браузер вместо
+           показа сразу предлагал сохранить файл. Теперь ссылка обычная,
+           с `target="_blank"`: PDF открывается во встроенном просмотрщике
+           отдельной вкладкой — сайт при этом остаётся на месте, а кнопки
+           «скачать» и «печать» у просмотрщика свои. -->
       <div class="doclist">
-        <a class="doclist__item" href="dokumenty/kartochka-predpriyatiya-uralsetstroi.pdf" download>
+        <a class="doclist__item" href="dokumenty/kartochka-predpriyatiya-uralsetstroi.pdf"
+           target="_blank" rel="noopener" type="application/pdf">
           <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a1 1 0 00-1 1v16a1 1 0 001 1h10a1 1 0 001-1V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>
           <span class="doclist__body">
             <span class="doclist__key">Карточка предприятия</span>
-            <span class="doclist__val">Реквизиты и банковские данные одним листом · PDF, 520 КБ</span>
+            <span class="doclist__val">Реквизиты и банковские данные одним листом · PDF, 520 КБ<span class="tiho"> — откроется в новой вкладке</span></span>
           </span>
         </a>
-        <a class="doclist__item" href="dokumenty/vypiska-sro.pdf" download>
+        <a class="doclist__item" href="dokumenty/vypiska-sro.pdf"
+           target="_blank" rel="noopener" type="application/pdf">
           <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg></span>
           <span class="doclist__body">
             <span class="doclist__key">Выписка из реестра СРО</span>
-            <span class="doclist__val">Право работ, уровень ответственности, страхование · PDF, 1,5 МБ</span>
+            <span class="doclist__val">Право работ, уровень ответственности, страхование · PDF, 1,5 МБ<span class="tiho"> — откроется в новой вкладке</span></span>
           </span>
         </a>
-        <a class="doclist__item" href="dokumenty/vypiska-egrul.pdf" download>
+        <a class="doclist__item" href="dokumenty/vypiska-egrul.pdf"
+           target="_blank" rel="noopener" type="application/pdf">
           <span class="doclist__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
           <span class="doclist__body">
             <span class="doclist__key">Выписка из ЕГРЮЛ</span>
-            <span class="doclist__val">Актуальна на 4 сентября 2026 года · PDF, 165 КБ</span>
+            <span class="doclist__val">Актуальна на 4 сентября 2026 года · PDF, 165 КБ<span class="tiho"> — откроется в новой вкладке</span></span>
           </span>
         </a>
       </div>
@@ -408,10 +418,6 @@
       </div>
     </div>
 
-    <p class="foto-note">
-      Фотографии тепловых пунктов и электромонтажа сняты на объектах компании. Остальные кадры иллюстративные: показано типовое современное оборудование, снимки со свободной лицензией (Pixabay, Pexels).
-      Снимки объектов компании поставим на их место, как только они появятся.
-    </p>
 
     <div class="foot__bottom">
       <span>© 2026 ООО «УРАЛСЕТЬСТРОЙ». Директор А. А. Бабенко.</span>
